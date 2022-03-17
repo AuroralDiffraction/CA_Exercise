@@ -10,7 +10,7 @@ module mux_3
     );
 
     always@(*)begin
-        if(select_a == 0)begin
+        if(select_a == 0 || select_a == 3)begin
             mux_out = input_a;
         end else if(select_a == 1)begin
             mux_out = input_b;

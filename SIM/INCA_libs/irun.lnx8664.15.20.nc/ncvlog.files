@@ -9,6 +9,7 @@
 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/cpu.v
 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/immediate_extend_unit.v
 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/mux_2.v
+/users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/mux_3.v
 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/pc.v
 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/reg_arstn.v
 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/reg_arstn_en.v
@@ -16,3 +17,5 @@
 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/sram.v
 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/cpu_tb.v
 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/saed32sram_mod.v
+/users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/forward_unit.v
+/users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/hazard_detection.v

@@ -75,6 +75,8 @@ wire [31:0] instruction_IF_ID_out;
 wire signed [63:0] immediate_extended;
 wire [1:0] ForwardA, ForwardB;
 wire [63:0] ForwardA_MUX_OUT,ForwardB_MUX_OUT;
+wire hazardMux, PCWrite, IF_ID_Write;
+wire [9:0] hazardControlOut;
 
 immediate_extend_unit immediate_extend_u(
     .instruction         (instruction_IF_ID_out),
@@ -92,7 +94,7 @@ pc #(
    .branch    (control_M_EX_ME_out[3]    ),
    .jump      (control_M_EX_ME_out[0]      ),
    .current_pc(current_pc),
-   .enable    (enable    ),
+   .enable    (enable & PCWrite    ),
    .updated_pc(updated_pc)
 );
 
@@ -104,7 +106,7 @@ reg_arstn_en#(
 )update_PC_IF_ID(
       .clk     (clk        ),
       .arst_n  (arst_n     ),
-      .en      (enable     ),
+      .en      (enable  & IF_ID_Write   ),
       .din     (updated_pc ),
       .dout    (update_PC_IF_ID_out)
 );
@@ -151,7 +153,7 @@ reg_arstn_en#(
 )instruction_IF_ID(
       .clk     (clk        ),
       .arst_n  (arst_n     ),
-      .en      (enable     ),
+      .en      (enable & IF_ID_Write    ),
       .din     (instruction ),
       .dout    (instruction_IF_ID_out)
 );
@@ -253,7 +255,7 @@ reg_arstn_en#(
       .clk     (clk        ),
       .arst_n  (arst_n     ),
       .en      (enable     ),
-      .din     ({alu_op[1:0], alu_src}),
+      .din     ({hazardControlOut[9:8], hazardControlOut[2]}),
       .dout    (control_EX_ID_EX_out)        // alu_op[1:0], alu_src
 );
 // control_EX_ID_EX pipeline register END
@@ -268,7 +270,7 @@ reg_arstn_en#(
       .clk     (clk        ),
       .arst_n  (arst_n     ),
       .en      (enable     ),
-      .din     ({branch, mem_read, mem_write, jump}),
+      .din     ({hazardControlOut[6], hazardControlOut[5], hazardControlOut[3], hazardControlOut[0]}),
       .dout    (control_M_ID_EX_out)        // branch, mem_read, mem_write, jump
 );
 // control_M_ID_EX pipeline register END
@@ -300,7 +302,7 @@ reg_arstn_en#(
       .clk     (clk        ),
       .arst_n  (arst_n     ),
       .en      (enable     ),
-      .din     ({mem_2_reg, reg_write}),
+      .din     ({hazardControlOut[4], hazardControlOut[1]}),
       .dout    (control_WB_ID_EX_out)        //mem_2_reg, reg_write
 );
 // control_WB_ID_EX pipeline register END
@@ -367,7 +369,7 @@ reg_arstn_en#(
       .clk     (clk        ),
       .arst_n  (arst_n     ),
       .en      (enable     ),
-      .din     (RegFile_Data2_ID_EX_out),
+      .din     (ForwardB_MUX_OUT),
       .dout    (RegFile_Data2_EX_ME_out)
 );
 // RegFile_Data2_EX_ME pipeline register END
@@ -444,7 +446,7 @@ mux_2 #(
 ) alu_operand_mux (
    .input_a (imm_gen_ID_EX_out),
    .input_b (RegFile_Data2_ID_EX_out   ),
-   .select_a(control_EX_ID_EX_out[0]   ),
+   .select_a(control_EX_ID_EX_out[0] ),//
    .mux_out (alu_operand_2     )
 );
 
@@ -544,10 +546,29 @@ mux_3 #(
    .DATA_W(64)
 ) ALU_INPUT_B (
    .input_a  (alu_operand_2     ),
-   .input_b  (regfile_wdata      ),
-   .input_c  (ALU_OUT_EX_ME_out      ),
+   .input_b  (regfile_wdata), //regfile_wdata
+   .input_c  (  ALU_OUT_EX_ME_out    ), //ALU_OUT_EX_ME_out
    .select_a (ForwardB ),
    .mux_out  (ForwardB_MUX_OUT)
+);
+
+hazard_detection hazard_detect_unit(
+   .Rs1(instruction_IF_ID_out[19:15]),
+   .Rs2(instruction_IF_ID_out[24:20]),
+   .Rd(instruction_ID_EX_out[11:7]),
+   .memRead(control_M_ID_EX_out[2]),
+   .hazardMux(hazardMux),
+   .PCWrite(PCWrite),
+   .IF_ID_Write(IF_ID_Write)
+);
+
+mux_2 #(
+   .DATA_W(10)
+) hazard_control_mux (
+   .input_a  ({alu_op[1:0],reg_dst,branch,mem_read,mem_2_reg,mem_write,alu_src,reg_write,jump}),
+   .input_b  (10'b0     ),
+   .select_a (hazardMux),
+   .mux_out  (hazardControlOut)
 );
 endmodule
 

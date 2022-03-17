@@ -2,7 +2,7 @@
 1647538202 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/alu_control.v
 1646926085 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/branch_unit.v
 1647537776 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/control_unit.v
-1647538459 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/cpu.v
+1647548104 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/cpu.v
 1646926085 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/immediate_extend_unit.v
 1646926085 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/mux_2.v
 1646926085 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/pc.v
@@ -12,3 +12,6 @@
 1646926085 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/sram.v
 1646926085 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/cpu_tb.v
 1646926085 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/saed32sram_mod.v
+1647544772 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/mux_3.v
+1647541549 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/forward_unit.v
+1647547846 /users/students/r0870767/Documents/CA_exercise/CA_Exercise/RTL/hazard_detection.v

@@ -16,6 +16,7 @@ set verilog_files { \
    register_file
    sram
    forward_unit
+   hazard_detection
 }
 
 
