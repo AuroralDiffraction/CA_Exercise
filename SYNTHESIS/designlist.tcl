@@ -9,11 +9,13 @@ set verilog_files { \
    cpu
    immediate_extend_unit
    mux_2
+   mux_3
    pc
    reg_arstn
    reg_arstn_en
    register_file
    sram
+   forward_unit
 }
 
 

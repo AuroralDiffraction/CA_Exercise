@@ -73,6 +73,8 @@ wire [31:0] instruction_EX_ME_out;
 wire [31:0] instruction_ID_EX_out;
 wire [31:0] instruction_IF_ID_out;
 wire signed [63:0] immediate_extended;
+wire [1:0] ForwardA, ForwardB;
+wire [63:0] ForwardA_MUX_OUT,ForwardB_MUX_OUT;
 
 immediate_extend_unit immediate_extend_u(
     .instruction         (instruction_IF_ID_out),
@@ -491,8 +493,8 @@ reg_arstn_en#(
 alu#(
    .DATA_W(64)
 ) alu(
-   .alu_in_0 (RegFile_Data1_ID_EX_out),
-   .alu_in_1 (alu_operand_2   ),
+   .alu_in_0 (ForwardA_MUX_OUT),
+   .alu_in_1 (ForwardB_MUX_OUT),
    .alu_ctrl (alu_control     ),
    .alu_out  (alu_out         ),
    .zero_flag(zero_flag       ),
@@ -517,7 +519,36 @@ branch_unit#(
    .jump_pc            (jump_pc           )
 );
 
+forward_unit forwardUnit(
+    .Rs1(instruction_ID_EX_out[19:15]),
+    .Rs2(instruction_ID_EX_out[24:20]),
+    .Rd_EX_ME(instruction_EX_ME_out[11:7]),
+    .Rd_ME_WB(instruction_ME_WB_out[11:7]),
+    .regWrite_EX_ME(control_WB_EX_ME_out[0]),
+    .regWrite_ME_WB(control_WB_ME_WB_out[0]),
+    .ForwardA(ForwardA),
+    .ForwardB(ForwardB)
+);
 
+mux_3 #(
+   .DATA_W(64)
+) ALU_INPUT_A (
+   .input_a  (RegFile_Data1_ID_EX_out     ),
+   .input_b  (regfile_wdata      ),
+   .input_c  (ALU_OUT_EX_ME_out      ),
+   .select_a (ForwardA ),
+   .mux_out  (ForwardA_MUX_OUT)
+);
+
+mux_3 #(
+   .DATA_W(64)
+) ALU_INPUT_B (
+   .input_a  (alu_operand_2     ),
+   .input_b  (regfile_wdata      ),
+   .input_c  (ALU_OUT_EX_ME_out      ),
+   .select_a (ForwardB ),
+   .mux_out  (ForwardB_MUX_OUT)
+);
 endmodule
 
 
