@@ -1,5 +1,5 @@
 ncverilog(64): 15.20-s058: (c) Copyright 1995-2018 Cadence Design Systems, Inc.
-TOOL:	ncverilog	15.20-s058: Started on Mar 10, 2022 at 19:24:46 CET
+TOOL:	ncverilog	15.20-s058: Started on Mar 17, 2022 at 18:38:30 CET
 ncverilog
 	+sv
 	-f files_verilog.f
@@ -21,16 +21,13 @@ ncverilog
 	+nctimescale+1ns/10ps
 	+access+rwc
 	-ALLOWREDEFINITION
-ncverilog: *W,WKWTLK: Waiting for a Exclusive lock on file '/users/students/r0867795/CA_Lab/CA_Exercise/SIM/INCA_libs/irun.lnx8664.15.20.nc/.nclib.lock'. pid:14455.
+ncverilog: *W,WKWTLK: Waiting for a Exclusive lock on file '/users/students/r0870767/Documents/CA_exercise/CA_Exercise/SIM/INCA_libs/irun.lnx8664.15.20.nc/.nclib.lock'. pid:15894.
 file: ../RTL/alu.v
 	module worklib.alu:v
 		errors: 0, warnings: 0
 file: ../RTL/alu_control.v
-   parameter [4:0] FUNC_SUB      = 4'b10000;
-                                          |
-ncvlog: *W,INTOVF (../RTL/alu_control.v,36|42): bit overflow during conversion from text [2.5(IEEE)] (4 bits).
 	module worklib.alu_control:v
-		errors: 0, warnings: 1
+		errors: 0, warnings: 0
 file: ../RTL/branch_unit.v
 	module worklib.branch_unit:v
 		errors: 0, warnings: 0
@@ -442,46 +439,66 @@ ncelab: *W,DSEMEL: This SystemVerilog design will be simulated as per IEEE 1800-
 			streams:  10, words:  2552
 		worklib.alu:v <0x1ada8e8a>
 			streams:   6, words:  5204
-		worklib.alu_control:v <0x2ebe94d4>
-			streams:   3, words:   976
+		worklib.alu_control:v <0x5332b386>
+			streams:   3, words:  1085
 		worklib.branch_unit:v <0x7b2dad56>
 			streams:   1, words:   490
-		worklib.control_unit:v <0x6ebbab2f>
-			streams:   1, words:  6577
-		worklib.cpu:v <0x13a5a1a1>
-			streams:   3, words:   437
-		worklib.cpu_tb:v <0x5d5e0357>
-			streams:  27, words: 53341
-		worklib.immediate_extend_unit:v <0x39ffa5c3>
-			streams:   3, words:  3232
+		worklib.control_unit:v <0x5c87058f>
+			streams:   1, words:  6521
+		worklib.cpu:v <0x0497ac05>
+			streams:   8, words:  1097
+		worklib.cpu_tb:v <0x0d63564c>
+			streams:  27, words: 53186
+		worklib.immediate_extend_unit:v <0x013d814d>
+			streams:   2, words:  3075
 		worklib.mux_2:v <0x69a21794>
 			streams:   1, words:   432
 		worklib.pc:v <0x64f655be>
 			streams:   5, words:  1517
 		worklib.reg_arstn:v <0x3ac60968>
 			streams:   3, words:   647
-		worklib.reg_arstn_en:v <0x01eab8f2>
+		worklib.reg_arstn_en:v <0x07099310>
+			streams:   3, words:   842
+		worklib.reg_arstn_en:v <0x0fea182b>
+			streams:   3, words:   802
+		worklib.reg_arstn_en:v <0x1a61f285>
+			streams:   3, words:   916
+		worklib.reg_arstn_en:v <0x1a7eb253>
 			streams:   3, words:  1033
-		worklib.register_file:v <0x2b8d66c4>
-			streams:   5, words: 28204
-		worklib.sram_BW32:v <0x6afb677b>
-			streams:  14, words:  5327
+		worklib.reg_arstn_en:v <0x1bb43899>
+			streams:   3, words:   916
+		worklib.reg_arstn_en:v <0x63c749ae>
+			streams:   4, words:   967
+		worklib.reg_arstn_en:v <0x669f301b>
+			streams:   3, words:   841
+		worklib.reg_arstn_en:v <0x697a0079>
+			streams:   3, words:   774
+		worklib.reg_arstn_en:v <0x709fd245>
+			streams:   3, words:   787
+		worklib.reg_arstn_en:v <0x7a229b92>
+			streams:   3, words:   916
+		worklib.reg_arstn_en:v <0x7f7ae227>
+			streams:   3, words:   841
+		worklib.register_file:v <0x7a425b1b>
+			streams:   5, words: 28015
+		worklib.sram_BW32:v <0x248c010f>
+			streams:  14, words:  5257
 		worklib.sram_BW64:v <0x01709e6d>
 			streams:  20, words:  7417
 	Building instance specific data structures.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
 		                   Instances  Unique
-		Modules:                1772      84
+		Modules:                1794      84
 		Primitives:             5220       1
-		Registers:              7016     233
-		Scalar wires:          12297       -
-		Expanded wires:         1312      41
-		Vectored wires:          123       -
-		Always blocks:          6606     190
+		Registers:              7060     233
+		Scalar wires:          12298       -
+		Expanded wires:         1321      44
+		Vectored wires:          146       -
+		Always blocks:          6650     190
 		Initial blocks:            3       3
 		Cont. assignments:         3       5
-		Pseudo assignments:     5405     149
+		Pseudo assignments:     5410     154
 		Simulation timescale:  100fs
 	Writing initial simulation snapshot: worklib.reg_arstn:v
 Loading snapshot worklib.reg_arstn:v .................... Done
@@ -489,10 +506,10 @@ ncsim: *W,DSEM2009: This SystemVerilog design is simulated as per IEEE 1800-2009
 ncsim> source /esat/micas-data/software/Cadence/incisiv_15.20.058/tools/inca/files/ncsimrc
 ncsim> run
 [1;34m
-Mult1 Working Correctly
+Mult2 Working Correctly
 [0m
-       2300 cycles
-Simulation complete via $finish(1) at time 386450 NS + 7
+         40 cycles
+Simulation complete via $finish(1) at time 160450 NS + 7
 ../RTL/cpu_tb.v:319    $finish;
 ncsim> exit
-TOOL:	ncverilog	15.20-s058: Exiting on Mar 10, 2022 at 19:25:09 CET  (total: 00:00:23)
+TOOL:	ncverilog	15.20-s058: Exiting on Mar 17, 2022 at 18:39:00 CET  (total: 00:00:30)

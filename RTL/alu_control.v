@@ -32,14 +32,14 @@ module alu_control(
    //alu operation can be found in Figure 4.12 of the Patterson Book,
    //section 4.4
    wire [4:0] function_field = {func7_5, func7_0, func3};
-   parameter [4:0] FUNC_ADD      = 4'b00000;
-   parameter [4:0] FUNC_SUB      = 4'b10000;
-   parameter [4:0] FUNC_AND      = 4'b00111;
-   parameter [4:0] FUNC_OR       = 4'b00110;
-   parameter [4:0] FUNC_SLT      = 4'b00010;
-   parameter [4:0] FUNC_SLL      = 4'b00001;
-   parameter [4:0] FUNC_SRL      = 4'b00101;
-   parameter [4:0] FUNC_MUL      = 4'b01000;
+   parameter [4:0] FUNC_ADD      = 5'b00000;
+   parameter [4:0] FUNC_SUB      = 5'b10000;
+   parameter [4:0] FUNC_AND      = 5'b00111;
+   parameter [4:0] FUNC_OR       = 5'b00110;
+   parameter [4:0] FUNC_SLT      = 5'b00010;
+   parameter [4:0] FUNC_SLL      = 5'b00001;
+   parameter [4:0] FUNC_SRL      = 5'b00101;
+   parameter [4:0] FUNC_MUL      = 5'b01000;
 
 	reg [3:0] rtype_op;
    

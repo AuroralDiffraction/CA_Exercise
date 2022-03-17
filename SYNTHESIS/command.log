@@ -1,7 +1,7 @@
 #@ # 
 #@ # Running dc_shell Version N-2017.09-SP3 for linux64 -- Jan 18, 2018
-#@ # Date:   Thu Mar 10 19:26:11 2022
-#@ # Run by: r0867795@pc-klas3-6.esat.kuleuven.be
+#@ # Date:   Thu Mar 17 18:40:18 2022
+#@ # Run by: r0870767@pc-klas3-10.esat.kuleuven.be
 #@ 
 
 source /esat/micas-data/software/synopsys_2017.09/admin/setup/.synopsys_dc.setup
@@ -6624,8 +6624,8 @@ source /esat/micas-data/software/synopsys_2017.09/admin/setup/.synopsys_dc.setup
 
 #@ # -- End source /esat/micas-data/software/synopsys_2017.09/admin/setup/.synopsys_dc.setup
 
-source -echo -verbose /users/students/r0867795/CA_Lab/CA_Exercise/SYNTHESIS/./synth.tcl
-#@ # -- Starting source /users/students/r0867795/CA_Lab/CA_Exercise/SYNTHESIS/./synth.tcl
+source -echo -verbose /users/students/r0870767/Documents/CA_exercise/CA_Exercise/SYNTHESIS/./synth.tcl
+#@ # -- Starting source /users/students/r0870767/Documents/CA_exercise/CA_Exercise/SYNTHESIS/./synth.tcl
 
 #@ set search_path       [concat $search_path ${synopsys_root}/libraries/syn]
 #@ set search_path       [concat $search_path ${synopsys_root}/dw/sim_ver]

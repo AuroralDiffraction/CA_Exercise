@@ -50,6 +50,28 @@ wire [      63:0] regfile_wdata,mem_data,alu_out,
                   regfile_rdata_1,regfile_rdata_2,
                   alu_operand_2;
 
+wire [3:0] control_M_EX_ME_out;
+wire [63:0] update_PC_ID_EX_out;
+wire [63:0] update_PC_IF_ID_out;
+wire [63:0] ALU_OUT_ME_WB_out;
+wire [63:0] ALU_OUT_EX_ME_out;
+wire ALU_ZERO_EX_ME_out;
+wire [63:0] imm_gen_ID_EX_out;
+wire [63:0] jump_PC_EX_ME_out;
+wire [63:0] branch_PC_EX_ME_out;
+wire [63:0] RegFile_Data2_EX_ME_out;
+wire [63:0] RegFile_Data2_ID_EX_out;
+wire [63:0] RegFile_Data1_ID_EX_out;
+wire [1:0] control_WB_ME_WB_out;
+wire [1:0] control_WB_EX_ME_out;
+wire [1:0] control_WB_ID_EX_out;
+wire [3:0] control_M_ID_EX_out;
+wire [2:0] control_EX_ID_EX_out;
+wire [63:0] DATA_MEM_ME_WB_out;
+wire [31:0] instruction_ME_WB_out;
+wire [31:0] instruction_EX_ME_out;
+wire [31:0] instruction_ID_EX_out;
+wire [31:0] instruction_IF_ID_out;
 wire signed [63:0] immediate_extended;
 
 immediate_extend_unit immediate_extend_u(
@@ -74,7 +96,7 @@ pc #(
 
 //-------------PC_BEGIN--------------
 // update_PC_IF_ID pipeline register BEGIN
-wire [63:0] update_PC_IF_ID_out;
+
 reg_arstn_en#(
    .DATA_W(64)
 )update_PC_IF_ID(
@@ -87,7 +109,7 @@ reg_arstn_en#(
 // update_PC_IF_ID pipeline register END
 
 // update_PC_ID_EX pipeline register BEGIN
-wire [63:0] update_PC_ID_EX_out;
+
 reg_arstn_en#(
    .DATA_W(64)
 )update_PC_ID_EX(
@@ -120,7 +142,7 @@ sram_BW32 #(
 
 ////////-----------------INSTRUCTION_BEGIN-------------
 // instruction_IF_ID pipeline register BEGIN
-wire [31:0] instruction_IF_ID_out;
+
 
 reg_arstn_en#(
    .DATA_W(32)
@@ -134,7 +156,6 @@ reg_arstn_en#(
 // instruction_IF_ID pipeline register END
 
 // instruction_ID_EX pipeline register BEGIN
-wire [31:0] instruction_ID_EX_out;
 
 reg_arstn_en#(
    .DATA_W(32)
@@ -148,7 +169,6 @@ reg_arstn_en#(
 // instruction_ID_EX pipeline register END
 
 // instruction_EX_ME pipeline register BEGIN
-wire [31:0] instruction_EX_ME_out;
 
 reg_arstn_en#(
    .DATA_W(32)
@@ -162,7 +182,6 @@ reg_arstn_en#(
 // instruction_EX_ME pipeline register END
 
 // instruction_ME_WB pipeline register BEGIN
-wire [31:0] instruction_ME_WB_out;
 
 reg_arstn_en#(
    .DATA_W(32)
@@ -180,7 +199,6 @@ reg_arstn_en#(
 
 ////////-----------------MEM_BEGIN-------------
 // DATA_MEM_ME_WB pipeline register BEGIN
-wire [63:0] DATA_MEM_ME_WB_out;
 
 reg_arstn_en#(
    .DATA_W(64)
@@ -226,7 +244,6 @@ control_unit control_unit(
 );
 
 // control_EX_ID_EX pipeline register BEGIN
-wire [2:0] control_EX_ID_EX_out;
 
 reg_arstn_en#(
    .DATA_W(3)
@@ -242,7 +259,6 @@ reg_arstn_en#(
 
 ////////////-----------M-BEGIN-------------------
 // control_M_ID_EX pipeline register BEGIN
-wire [3:0] control_M_ID_EX_out;
 
 reg_arstn_en#(
    .DATA_W(4)
@@ -256,7 +272,7 @@ reg_arstn_en#(
 // control_M_ID_EX pipeline register END
 
 // control_M_EX_ME pipeline register BEGIN
-wire [3:0] control_M_EX_ME_out;
+
 
 reg_arstn_en#(
    .DATA_W(4)
@@ -275,7 +291,6 @@ reg_arstn_en#(
 
 ////////////-----------WB-BEGIN-------------------
 // control_WB_ID_EX pipeline register BEGIN
-wire [1:0] control_WB_ID_EX_out;
 
 reg_arstn_en#(
    .DATA_W(2)
@@ -289,7 +304,6 @@ reg_arstn_en#(
 // control_WB_ID_EX pipeline register END
 
 // control_WB_EX_ME pipeline register BEGIN
-wire [1:0] control_WB_EX_ME_out;
 
 reg_arstn_en#(
    .DATA_W(2)
@@ -303,7 +317,6 @@ reg_arstn_en#(
 // control_WB_EX_ME pipeline register END
 
 // control_WB_ME_WB pipeline register BEGIN
-wire [1:0] control_WB_ME_WB_out;
 
 reg_arstn_en#(
    .DATA_W(2)
@@ -319,7 +332,6 @@ reg_arstn_en#(
 
 ////////////----------REGISTER_BEGIN-------------
 // RegFile_Data1_ID_EX pipeline register BEGIN
-wire [63:0] RegFile_Data1_ID_EX_out;
 
 reg_arstn_en#(
    .DATA_W(64)
@@ -333,7 +345,6 @@ reg_arstn_en#(
 // RegFile_Data1_ID_EX pipeline register END
 
 // RegFile_Data2_ID_EX pipeline register BEGIN
-wire [63:0] RegFile_Data2_ID_EX_out;
 
 reg_arstn_en#(
    .DATA_W(64)
@@ -347,7 +358,6 @@ reg_arstn_en#(
 // RegFile_Data2_ID_EX pipeline register END
 
 // RegFile_Data2_EX_ME pipeline register BEGIN
-wire [63:0] RegFile_Data2_EX_ME_out;
 
 reg_arstn_en#(
    .DATA_W(64)
@@ -364,7 +374,6 @@ reg_arstn_en#(
 
 ////////////----------BRANCH_UNIT_BEGIN-------------
 // branch_PC_EX_ME pipeline register BEGIN
-wire [63:0] branch_PC_EX_ME_out;
 
 reg_arstn_en#(
    .DATA_W(64)
@@ -378,7 +387,6 @@ reg_arstn_en#(
 // branch_PC_EX_ME pipeline register END
 
 // jump_PC_EX_ME pipeline register BEGIN
-wire [63:0] jump_PC_EX_ME_out;
 
 reg_arstn_en#(
    .DATA_W(64)
@@ -394,11 +402,10 @@ reg_arstn_en#(
 
 ////////////----------IMM_GEN_BEGIN-------------
 // imm_gen_ID_EX pipeline register BEGIN
-wire [63:0] imm_gen_ID_EX_out;
 
 reg_arstn_en#(
    .DATA_W(64)
-)branch_PC_EX_ME(
+)imm_gen_ID_EX(
       .clk     (clk        ),
       .arst_n  (arst_n     ),
       .en      (enable     ),
@@ -441,7 +448,6 @@ mux_2 #(
 
 ////////////----------ALU_BEGIN-------------
 // ALU_ZERO_EX_ME pipeline register BEGIN
-wire ALU_ZERO_EX_ME_out;
 
 reg_arstn_en#(
    .DATA_W(1)
@@ -455,7 +461,6 @@ reg_arstn_en#(
 // ALU_ZERO_EX_ME pipeline register END
 
 // ALU_OUT_EX_ME pipeline register BEGIN
-wire [63:0] ALU_OUT_EX_ME_out;
 
 reg_arstn_en#(
    .DATA_W(64)
@@ -469,7 +474,6 @@ reg_arstn_en#(
 // ALU_OUT_EX_ME pipeline register END
 
 // ALU_OUT_ME_WB pipeline register BEGIN
-wire [63:0] ALU_OUT_ME_WB_out;
 
 reg_arstn_en#(
    .DATA_W(64)
