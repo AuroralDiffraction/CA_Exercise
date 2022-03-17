@@ -3,15 +3,15 @@
 
 module control_unit(
       input  wire [6:0] opcode,
-      output reg  [1:0] alu_op,
+      output reg  [1:0] alu_op,     // EX
       output reg        reg_dst,
-      output reg        branch,
-      output reg        mem_read,
-      output reg        mem_2_reg,
-      output reg        mem_write,
-      output reg        alu_src,
-      output reg        reg_write,
-      output reg        jump
+      output reg        branch,     // M(PC)
+      output reg        mem_read,   // M
+      output reg        mem_2_reg,  // WB
+      output reg        mem_write,  // M
+      output reg        alu_src,    // EX
+      output reg        reg_write,  // WB
+      output reg        jump        // M
    );
 
    // RISC-V opcode[6:0] (see RISC-V greensheet)
