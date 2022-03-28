@@ -506,10 +506,10 @@ alu#(
 mux_2 #(
    .DATA_W(64)
 ) regfile_data_mux (
-   .input_a  (DATA_MEM_ME_WB_out     ),
+   .input_a  (    regfile_wdata      ),
    .input_b  (ALU_OUT_ME_WB_out      ),
    .select_a (control_WB_ME_WB_out[1]    ),
-   .mux_out  (regfile_wdata)
+   .mux_out  (ForwardA_MUX_OUT)
 );
 
 branch_unit#(
@@ -536,10 +536,10 @@ mux_3 #(
    .DATA_W(64)
 ) ALU_INPUT_A (
    .input_a  (RegFile_Data1_ID_EX_out     ),
-   .input_b  (regfile_wdata      ),
+   .input_b  (DATA_MEM_ME_WB_out ),
    .input_c  (ALU_OUT_EX_ME_out      ),
    .select_a (ForwardA ),
-   .mux_out  (ForwardA_MUX_OUT)
+   .mux_out  (regfile_wdata)
 );
 
 mux_3 #(
