@@ -445,9 +445,9 @@ mux_2 #(
    .DATA_W(64)
 ) alu_operand_mux (
    .input_a (imm_gen_ID_EX_out),
-   .input_b (RegFile_Data2_ID_EX_out   ),
+   .input_b (alu_operand_2),
    .select_a(control_EX_ID_EX_out[0] ),//
-   .mux_out (alu_operand_2     )
+   .mux_out (ForwardB_MUX_OUT     )
 );
 
 ////////////----------ALU_BEGIN-------------
@@ -506,10 +506,10 @@ alu#(
 mux_2 #(
    .DATA_W(64)
 ) regfile_data_mux (
-   .input_a  (    regfile_wdata      ),
+   .input_a  (DATA_MEM_ME_WB_out     ),
    .input_b  (ALU_OUT_ME_WB_out      ),
    .select_a (control_WB_ME_WB_out[1]    ),
-   .mux_out  (ForwardA_MUX_OUT)
+   .mux_out  (regfile_wdata)
 );
 
 branch_unit#(
@@ -536,20 +536,20 @@ mux_3 #(
    .DATA_W(64)
 ) ALU_INPUT_A (
    .input_a  (RegFile_Data1_ID_EX_out     ),
-   .input_b  (DATA_MEM_ME_WB_out ),
+   .input_b  (regfile_wdata      ),
    .input_c  (ALU_OUT_EX_ME_out      ),
    .select_a (ForwardA ),
-   .mux_out  (regfile_wdata)
+   .mux_out  (ForwardA_MUX_OUT)
 );
 
 mux_3 #(
    .DATA_W(64)
 ) ALU_INPUT_B (
-   .input_a  (alu_operand_2     ),
+   .input_a  (RegFile_Data2_ID_EX_out  ),
    .input_b  (regfile_wdata), //regfile_wdata
    .input_c  (  ALU_OUT_EX_ME_out    ), //ALU_OUT_EX_ME_out
    .select_a (ForwardB ),
-   .mux_out  (ForwardB_MUX_OUT)
+   .mux_out  (alu_operand_2     )
 );
 
 hazard_detection hazard_detect_unit(
