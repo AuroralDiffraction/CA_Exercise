@@ -9,5 +9,3 @@ files_verilog.f
 +nctimescale+1ns/10ps
 +access+rwc
 -ALLOWREDEFINITION
--linedebug
-+gui

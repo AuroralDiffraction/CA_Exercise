@@ -6,13 +6,11 @@
 +nc64bit
 +nctimescale+1ns/10ps
 +access+rwc
-+gui
--gui
 -MESSAGES
 +EMGRLOG
 ncverilog.log
 -XLSTIME
-1647548780
+1648512143
 -XLKEEP
 -XLMODE
 ./INCA_libs/irun.lnx8664.15.20.nc

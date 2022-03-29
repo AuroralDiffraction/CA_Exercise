@@ -6,13 +6,11 @@
 +nc64bit
 +nctimescale+1ns/10ps
 +access+rwc
-+gui
--gui
 -MESSAGES
 +EMGRLOG
 ncverilog.log
 -XLSTIME
-1647548780
+1648512143
 -XLKEEP
 -XLMODE
 ./INCA_libs/irun.lnx8664.15.20.nc
@@ -26,4 +24,4 @@ ncverilog
 -XLVERSION
 "TOOL:	ncverilog	15.20-s058"
 -XLNAME
-./INCA_libs/irun.lnx8664.15.20.nc/pc-klas3-10.esat.kuleuven.be_21932
+./INCA_libs/irun.lnx8664.15.20.nc/stud-r8-spice-a.esat.kuleuven.be_3989

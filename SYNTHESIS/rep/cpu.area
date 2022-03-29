@@ -3,7 +3,7 @@
 Report : area
 Design : cpu
 Version: N-2017.09-SP3
-Date   : Thu Mar 17 18:41:37 2022
+Date   : Tue Mar 29 02:10:05 2022
 ****************************************
 
 Information: Updating design information... (UID-85)
@@ -13,23 +13,23 @@ Library(s) Used:
     saed32rvt_tt1p05v25c (File: /users/micas/micas/design/generic/synopsys_32nm/SAED32_EDK/lib/stdcell_rvt/db_ccs/saed32rvt_tt1p05v25c.db)
     saed32sram_tt1p05v25c (File: /users/micas/micas/design/generic/synopsys_32nm/SAED32_EDK/lib/sram/db_ccs/saed32sram_tt1p05v25c.db)
 
-Number of ports:                         4896
-Number of nets:                         18402
-Number of cells:                        13532
-Number of combinational cells:           9806
-Number of sequential cells:              3620
+Number of ports:                         5488
+Number of nets:                         18929
+Number of cells:                        13468
+Number of combinational cells:          10026
+Number of sequential cells:              3331
 Number of macros/black boxes:              20
-Number of buf/inv:                        538
-Number of references:                      34
+Number of buf/inv:                        571
+Number of references:                      40
 
-Combinational area:              25541.471984
-Buf/Inv area:                      689.238531
-Noncombinational area:           18473.727682
+Combinational area:              26167.936958
+Buf/Inv area:                      730.664003
+Noncombinational area:           18552.004035
 Macro/Black Box area:           379865.820312
-Net Interconnect area:           36483.340476
+Net Interconnect area:           37226.910879
 
-Total cell area:                423881.019978
-Total area:                     460364.360454
+Total cell area:                424585.761306
+Total area:                     461812.672185
 
 Hierarchical area distribution
 ------------------------------
@@ -39,7 +39,9 @@ Hierarchical area distribution
 Hierarchical cell                 Absolute     Percent  Combi-      Noncombi-   Black-
                                   Total        Total    national    national    boxes        Design
 --------------------------------  -----------  -------  ----------  ----------  -----------  ----------------------------------------------
-cpu                               423881.0200    100.0      6.0995      0.0000       0.0000  cpu
+cpu                               424585.7613    100.0      8.1326      0.0000       0.0000  cpu
+ALU_INPUT_A                          226.4423      0.1    226.4423      0.0000       0.0000  mux_3_DATA_W64_1
+ALU_INPUT_B                          220.8511      0.1    220.8511      0.0000       0.0000  mux_3_DATA_W64_0
 ALU_OUT_EX_ME                        461.2714      0.1      0.0000    455.4261       0.0000  reg_arstn_en_DATA_W64_1
 ALU_OUT_EX_ME/clk_gate_r_reg           5.8453      0.0      0.0000      5.8453       0.0000  SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_0_1
 ALU_OUT_ME_WB                        461.2714      0.1      0.0000    455.4261       0.0000  reg_arstn_en_DATA_W64_0
@@ -56,7 +58,7 @@ RegFile_Data2_EX_ME/clk_gate_r_reg
 RegFile_Data2_ID_EX                  461.2714      0.1      0.0000    455.4261       0.0000  reg_arstn_en_DATA_W64_6
 RegFile_Data2_ID_EX/clk_gate_r_reg
                                        5.8453      0.0      0.0000      5.8453       0.0000  SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_0_5
-alu                                15289.8113      3.6  15289.8113      0.0000       0.0000  alu_DATA_W64
+alu                                15317.0047      3.6  15317.0047      0.0000       0.0000  alu_DATA_W64
 alu_ctrl                              43.4586      0.0     43.4586      0.0000       0.0000  alu_control
 alu_operand_mux                      163.9229      0.0    163.9229      0.0000       0.0000  mux_2_DATA_W64_3
 branch_PC_EX_ME                       84.1217      0.0      0.0000     78.2764       0.0000  reg_arstn_en_DATA_W64_4
@@ -65,26 +67,29 @@ branch_unit                           95.5581      0.0     95.5581      0.0000  
 control_EX_ID_EX                      27.1934      0.0      0.0000     21.3481       0.0000  reg_arstn_en_DATA_W3
 control_EX_ID_EX/clk_gate_r_reg        5.8453      0.0      0.0000      5.8453       0.0000  SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W3
 control_M_EX_ME                       27.1934      0.0      0.0000     21.3481       0.0000  reg_arstn_en_DATA_W4_0
-control_M_EX_ME/clk_gate_r_reg         5.8453      0.0      0.0000      5.8453       0.0000  SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W4_0_0
-control_M_ID_EX                       27.1934      0.0      0.0000     21.3481       0.0000  reg_arstn_en_DATA_W4_1
-control_M_ID_EX/clk_gate_r_reg         5.8453      0.0      0.0000      5.8453       0.0000  SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W4_0_1
+control_M_EX_ME/clk_gate_r_reg         5.8453      0.0      0.0000      5.8453       0.0000  SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W4_0
+control_M_ID_EX                       34.3094      0.0      0.0000     28.4641       0.0000  reg_arstn_en_DATA_W4_1
+control_M_ID_EX/clk_gate_r_reg         5.8453      0.0      0.0000      5.8453       0.0000  SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W4_1
 control_WB_EX_ME                      20.5857      0.0      6.3536     14.2321       0.0000  reg_arstn_en_DATA_W2_1
 control_WB_ID_EX                      20.5857      0.0      6.3536     14.2321       0.0000  reg_arstn_en_DATA_W2_2
 control_WB_ME_WB                      20.5857      0.0      6.3536     14.2321       0.0000  reg_arstn_en_DATA_W2_0
 control_unit                          41.4255      0.0     41.4255      0.0000       0.0000  control_unit
-data_memory                       305706.9903     72.1   1814.3340      0.0000  303892.6562  sram_BW64_ADDR_W10_DATA_W64
+data_memory                       305706.9903     72.0   1814.3340      0.0000  303892.6562  sram_BW64_ADDR_W10_DATA_W64
+forwardUnit                           90.4753      0.0     90.4753      0.0000       0.0000  forward_unit
+hazard_control_mux                    14.2321      0.0     14.2321      0.0000       0.0000  mux_2_DATA_W10
+hazard_detect_unit                    44.9835      0.0     44.9835      0.0000       0.0000  hazard_detection
 imm_gen_ID_EX                        461.2714      0.1      0.0000    455.4261       0.0000  reg_arstn_en_DATA_W64_2
 imm_gen_ID_EX/clk_gate_r_reg           5.8453      0.0      0.0000      5.8453       0.0000  SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_2
 immediate_extend_u                    55.4034      0.0     55.4034      0.0000       0.0000  immediate_extend_unit
 instruction_EX_ME                     41.4255      0.0      0.0000     35.5802       0.0000  reg_arstn_en_DATA_W32_1
 instruction_EX_ME/clk_gate_r_reg       5.8453      0.0      0.0000      5.8453       0.0000  SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W32_0_1
-instruction_ID_EX                     77.0056      0.0      0.0000     71.1603       0.0000  reg_arstn_en_DATA_W32_2
+instruction_ID_EX                    148.1660      0.0      0.0000    142.3206       0.0000  reg_arstn_en_DATA_W32_2
 instruction_ID_EX/clk_gate_r_reg       5.8453      0.0      0.0000      5.8453       0.0000  SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W32_2
 instruction_IF_ID                    233.5583      0.1      0.0000    227.7130       0.0000  reg_arstn_en_DATA_W32_3
 instruction_IF_ID/clk_gate_r_reg       5.8453      0.0      0.0000      5.8453       0.0000  SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W32_3
 instruction_ME_WB                     41.4255      0.0      0.0000     35.5802       0.0000  reg_arstn_en_DATA_W32_0
 instruction_ME_WB/clk_gate_r_reg       5.8453      0.0      0.0000      5.8453       0.0000  SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W32_0_0
-instruction_memory                 76463.4078     18.0    490.2438      0.0000   75973.1641  sram_BW32_ADDR_W9_DATA_W32
+instruction_memory                 76463.6620     18.0    490.4979      0.0000   75973.1641  sram_BW32_ADDR_W9_DATA_W32
 jump_PC_EX_ME                         84.1217      0.0      0.0000     78.2764       0.0000  reg_arstn_en_DATA_W64_3
 jump_PC_EX_ME/clk_gate_r_reg           5.8453      0.0      0.0000      5.8453       0.0000  SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_0_2
 program_counter                      187.0500      0.0     44.4752      0.0000       0.0000  pc_DATA_W64
@@ -162,7 +167,7 @@ update_PC_ID_EX/clk_gate_r_reg         5.8453      0.0      0.0000      5.8453  
 update_PC_IF_ID                       84.1217      0.0      0.0000     78.2764       0.0000  reg_arstn_en_DATA_W64_10
 update_PC_IF_ID/clk_gate_r_reg         5.8453      0.0      0.0000      5.8453       0.0000  SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_0_9
 --------------------------------  -----------  -------  ----------  ----------  -----------  ----------------------------------------------
-Total                                                   25541.4720  18473.7277  379865.8203
+Total                                                   26167.9370  18552.0040  379865.8203
 
 
 Area of detected synthetic parts
@@ -174,18 +179,18 @@ Estimated area of ungrouped synthetic parts
                                        Estimated  Perc. of
   Module              Implem.  Count        Area cell area
   ------------------- -------  ----- ----------- ---------
-  DP_OP_18J4_122_7052     str      1    585.3252      0.1%
-  DP_OP_9J2_122_763       str      1    704.6820      0.2%
-  DW01_add            apparch      1    201.5542      0.0%
-  DW02_mult           apparch      1  10579.4576      2.5%
-  DW_cmp              apparch      1    433.1649      0.1%
+  DP_OP_18J2_122_7052     str      1    585.3770      0.1%
+  DP_OP_9J2_125_763       str      1    704.7320      0.2%
+  DW01_add            apparch      1    201.5685      0.0%
+  DW02_mult           apparch      1  10580.2073      2.5%
+  DW_cmp              apparch      7    458.9598      0.1%
   DW_leftsh              astr      1   1409.7347      0.3%
   DW_rightsh             astr      1   1438.9608      0.3%
   ------------------- -------  ----- ----------- ---------
-  DP_OP Subtotal:                  2   1290.0072      0.3%
-  Total:                           7  15352.8795      3.6%
+  DP_OP Subtotal:                  2   1290.1090      0.3%
+  Total:                          13  15379.5403      3.6%
 
-Subtotal of datapath(DP_OP) cell area:  1290.0072  0.3%  (estimated)
-Total synthetic cell area:              15352.8795  3.6%  (estimated)
+Subtotal of datapath(DP_OP) cell area:  1290.1090  0.3%  (estimated)
+Total synthetic cell area:              15379.5403  3.6%  (estimated)
 
 1

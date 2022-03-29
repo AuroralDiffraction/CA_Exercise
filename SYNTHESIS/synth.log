@@ -64,11 +64,14 @@ source "./designlist.tcl"
    cpu
    immediate_extend_unit
    mux_2
+   mux_3
    pc
    reg_arstn
    reg_arstn_en
    register_file
    sram
+   forward_unit
+   hazard_detection
 
 # analyze verilog files
 foreach verilog_file ${verilog_files} {
@@ -104,6 +107,9 @@ Running PRESTO HDLC
 Compiling source file ../RTL/mux_2.v
 Presto compilation completed successfully.
 Running PRESTO HDLC
+Compiling source file ../RTL/mux_3.v
+Presto compilation completed successfully.
+Running PRESTO HDLC
 Compiling source file ../RTL/pc.v
 Presto compilation completed successfully.
 Running PRESTO HDLC
@@ -120,6 +126,12 @@ Running PRESTO HDLC
 Compiling source file ../RTL/sram.v
 Warning:  ../RTL/sram.v:43: Parameter keyword used in local parameter declaration. (VER-329)
 Warning:  ../RTL/sram.v:130: Parameter keyword used in local parameter declaration. (VER-329)
+Presto compilation completed successfully.
+Running PRESTO HDLC
+Compiling source file ../RTL/forward_unit.v
+Presto compilation completed successfully.
+Running PRESTO HDLC
+Compiling source file ../RTL/hazard_detection.v
 Presto compilation completed successfully.
 # elaborate design
 elaborate -library work $top_des_name
@@ -307,6 +319,16 @@ Information: Building the design 'branch_unit' instantiated from design 'cpu' wi
 	the parameters "DATA_W=64". (HDL-193)
 Warning:  ../RTL/branch_unit.v:22: signed to unsigned conversion occurs. (VER-318)
 Warning:  ../RTL/branch_unit.v:23: signed to unsigned conversion occurs. (VER-318)
+Presto compilation completed successfully.
+Information: Building the design 'forward_unit'. (HDL-193)
+Presto compilation completed successfully.
+Information: Building the design 'mux_3' instantiated from design 'cpu' with
+	the parameters "DATA_W=64". (HDL-193)
+Presto compilation completed successfully.
+Information: Building the design 'hazard_detection'. (HDL-193)
+Presto compilation completed successfully.
+Information: Building the design 'mux_2' instantiated from design 'cpu' with
+	the parameters "DATA_W=10". (HDL-193)
 Presto compilation completed successfully.
 Information: Building the design 'reg_arstn_en' instantiated from design 'pc_DATA_W64' with
 	the parameters "DATA_W=64,PRESET_VAL=32'h00000000". (HDL-193)
@@ -808,18 +830,19 @@ check_design
 ****************************************
 check_design summary:
 Version:     N-2017.09-SP3
-Date:        Thu Mar 17 18:40:24 2022
+Date:        Tue Mar 29 02:08:33 2022
 ****************************************
 
                    Name                                            Total
 --------------------------------------------------------------------------------
-Inputs/Outputs                                                    227
+Inputs/Outputs                                                    229
     Unconnected ports (LINT-28)                                   226
-    Shorted outputs (LINT-31)                                       1
+    Shorted outputs (LINT-31)                                       3
 
-Cells                                                              35
-    Connected to power or ground (LINT-32)                         34
-    Nets connected to multiple pins on same cell (LINT-33)          1
+Cells                                                              47
+    Connected to power or ground (LINT-32)                         44
+    Nets connected to multiple pins on same cell (LINT-33)          2
+    Leaf pins connected to undriven nets (LINT-58)                  1
 
 Nets                                                               29
     Unloaded nets (LINT-2)                                         29
@@ -852,7 +875,7 @@ Warning: In design 'cpu', net 'instruction_ME_WB_out[28]' driven by pin 'instruc
 Warning: In design 'cpu', net 'instruction_ME_WB_out[29]' driven by pin 'instruction_ME_WB/dout[29]' has no loads. (LINT-2)
 Warning: In design 'cpu', net 'instruction_ME_WB_out[30]' driven by pin 'instruction_ME_WB/dout[30]' has no loads. (LINT-2)
 Warning: In design 'cpu', net 'instruction_ME_WB_out[31]' driven by pin 'instruction_ME_WB/dout[31]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'reg_dst' driven by pin 'control_unit/reg_dst' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'hazardControlOut[7]' driven by pin 'hazard_control_mux/mux_out[7]' has no loads. (LINT-2)
 Warning: In design 'cpu', net 'register_file/*Logic1*' driven by pin 'register_file/U3/**logic_1**' has no loads. (LINT-2)
 Warning: In design 'immediate_extend_unit', port 'instruction[2]' is not connected to any nets. (LINT-28)
 Warning: In design 'immediate_extend_unit', port 'instruction[1]' is not connected to any nets. (LINT-28)
@@ -1081,6 +1104,8 @@ Warning: In design 'sram_BW64_ADDR_W10_DATA_W64', port 'ren' is not connected to
 Warning: In design 'sram_BW64_ADDR_W10_DATA_W64', port 'ren_ext' is not connected to any nets. (LINT-28)
 Warning: In design 'control_unit', port 'reg_dst' is not connected to any nets. (LINT-28)
 Warning: In design 'control_unit', output port 'mem_read' is connected directly to output port 'mem_2_reg'. (LINT-31)
+Warning: In design 'hazard_detection', output port 'hazardMux' is connected directly to output port 'IF_ID_Write'. (LINT-31)
+Warning: In design 'hazard_detection', output port 'hazardMux' is connected directly to output port 'PCWrite'. (LINT-31)
 Warning: In design 'cpu', a pin on submodule 'instruction_memory' is connected to logic 1 or logic 0. (LINT-32)
    Pin 'wen' is connected to logic 0. 
 Warning: In design 'cpu', a pin on submodule 'instruction_memory' is connected to logic 1 or logic 0. (LINT-32)
@@ -1149,11 +1174,39 @@ Warning: In design 'cpu', a pin on submodule 'instruction_memory' is connected t
    Pin 'wdata[1]' is connected to logic 0. 
 Warning: In design 'cpu', a pin on submodule 'instruction_memory' is connected to logic 1 or logic 0. (LINT-32)
    Pin 'wdata[0]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[9]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[8]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[7]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[6]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[5]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[4]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[3]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[2]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[1]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[0]' is connected to logic 0. 
 Warning: In design 'cpu', the same net is connected to more than one pin on submodule 'instruction_memory'. (LINT-33)
    Net '*Logic0*' is connected to pins 'wen', 'wdata[31]'', 'wdata[30]', 'wdata[29]', 'wdata[28]', 'wdata[27]', 'wdata[26]', 'wdata[25]', 'wdata[24]', 'wdata[23]', 'wdata[22]', 'wdata[21]', 'wdata[20]', 'wdata[19]', 'wdata[18]', 'wdata[17]', 'wdata[16]', 'wdata[15]', 'wdata[14]', 'wdata[13]', 'wdata[12]', 'wdata[11]', 'wdata[10]', 'wdata[9]', 'wdata[8]', 'wdata[7]', 'wdata[6]', 'wdata[5]', 'wdata[4]', 'wdata[3]', 'wdata[2]', 'wdata[1]', 'wdata[0]'.
+Warning: In design 'cpu', the same net is connected to more than one pin on submodule 'hazard_control_mux'. (LINT-33)
+   Net '*Logic0*' is connected to pins 'input_b[9]', 'input_b[8]'', 'input_b[7]', 'input_b[6]', 'input_b[5]', 'input_b[4]', 'input_b[3]', 'input_b[2]', 'input_b[1]', 'input_b[0]'.
+Warning: In design 'mux_2_DATA_W10', input pin 'DATA1_7' of leaf cell 'C21' is connected to undriven net 'input_a[7]'.  (LINT-58)
 1
 check_timing
 Information: Checking out the license 'DesignWare'. (SEC-104)
+Information: Changed wire load model for 'mux_2_DATA_W10' from '(none)' to 'ForQA'. (OPT-170)
+Information: Changed wire load model for 'hazard_detection' from '(none)' to 'ForQA'. (OPT-170)
+Information: Changed wire load model for 'mux_3_DATA_W64' from '(none)' to 'ForQA'. (OPT-170)
+Information: Changed wire load model for 'mux_3_DATA_W64' from '(none)' to 'ForQA'. (OPT-170)
+Information: Changed wire load model for 'forward_unit' from '(none)' to 'ForQA'. (OPT-170)
 Information: Changed wire load model for 'branch_unit_DATA_W64' from '(none)' to 'ForQA'. (OPT-170)
 Information: Changed wire load model for 'mux_2_DATA_W64' from '(none)' to 'ForQA'. (OPT-170)
 Information: Changed wire load model for 'alu_DATA_W64' from '(none)' to 'ForQA'. (OPT-170)
@@ -1190,12 +1243,18 @@ Information: Changed wire load model for 'mux_2_DATA_W64' from '(none)' to 'ForQ
 Information: Changed wire load model for 'mux_2_DATA_W64' from '(none)' to 'ForQA'. (OPT-170)
 Information: Changed wire load model for 'pc_DATA_W64' from '(none)' to 'ForQA'. (OPT-170)
 Information: Changed wire load model for 'immediate_extend_unit' from '(none)' to 'ForQA'. (OPT-170)
-Information: Changed wire load model for 'alt1' from '(none)' to 'ForQA'. (OPT-170)
-Information: Changed wire load model for 'astr' from '(none)' to 'ForQA'. (OPT-170)
-Information: Changed wire load model for 'alt1' from '(none)' to 'ForQA'. (OPT-170)
-Information: Changed wire load model for 'astr' from '(none)' to 'ForQA'. (OPT-170)
-Information: Changed wire load model for 'alt1' from '(none)' to 'ForQA'. (OPT-170)
-Information: Changed wire load model for 'apparch' from '(none)' to 'ForQA'. (OPT-170)
+Information: Changed wire load model for 'DW01_cmp6_width5' from '(none)' to 'ForQA'. (OPT-170)
+Information: Changed wire load model for '*EQ_UNS_OP_5_5_1' from '(none)' to 'ForQA'. (OPT-170)
+Information: Changed wire load model for 'DW01_cmp6_width5' from '(none)' to 'ForQA'. (OPT-170)
+Information: Changed wire load model for '*EQ_UNS_OP_5_5_1' from '(none)' to 'ForQA'. (OPT-170)
+Information: Changed wire load model for 'DW01_cmp6_width5' from '(none)' to 'ForQA'. (OPT-170)
+Information: Changed wire load model for '*EQ_UNS_OP_5_5_1' from '(none)' to 'ForQA'. (OPT-170)
+Information: Changed wire load model for 'DW01_cmp6_width5' from '(none)' to 'ForQA'. (OPT-170)
+Information: Changed wire load model for '*EQ_UNS_OP_5_5_1' from '(none)' to 'ForQA'. (OPT-170)
+Information: Changed wire load model for 'DW01_cmp6_width5' from '(none)' to 'ForQA'. (OPT-170)
+Information: Changed wire load model for '*EQ_UNS_OP_5_5_1' from '(none)' to 'ForQA'. (OPT-170)
+Information: Changed wire load model for 'DW01_cmp6_width5' from '(none)' to 'ForQA'. (OPT-170)
+Information: Changed wire load model for '*EQ_UNS_OP_5_5_1' from '(none)' to 'ForQA'. (OPT-170)
 Information: Changed wire load model for 'DW01_sub_width64' from '(none)' to 'ForQA'. (OPT-170)
 Information: Changed wire load model for '*SUB_UNS_OP_64_3_64' from '(none)' to 'ForQA'. (OPT-170)
 Information: Changed wire load model for 'DW01_sub_width64' from '(none)' to 'ForQA'. (OPT-170)
@@ -2586,38 +2645,6 @@ instruction_ID_EX/r_reg[28]/synch_enable
 instruction_ID_EX/r_reg[29]/synch_enable
 instruction_ID_EX/r_reg[30]/synch_enable
 instruction_ID_EX/r_reg[31]/synch_enable
-instruction_IF_ID/r_reg[0]/synch_enable
-instruction_IF_ID/r_reg[1]/synch_enable
-instruction_IF_ID/r_reg[2]/synch_enable
-instruction_IF_ID/r_reg[3]/synch_enable
-instruction_IF_ID/r_reg[4]/synch_enable
-instruction_IF_ID/r_reg[5]/synch_enable
-instruction_IF_ID/r_reg[6]/synch_enable
-instruction_IF_ID/r_reg[7]/synch_enable
-instruction_IF_ID/r_reg[8]/synch_enable
-instruction_IF_ID/r_reg[9]/synch_enable
-instruction_IF_ID/r_reg[10]/synch_enable
-instruction_IF_ID/r_reg[11]/synch_enable
-instruction_IF_ID/r_reg[12]/synch_enable
-instruction_IF_ID/r_reg[13]/synch_enable
-instruction_IF_ID/r_reg[14]/synch_enable
-instruction_IF_ID/r_reg[15]/synch_enable
-instruction_IF_ID/r_reg[16]/synch_enable
-instruction_IF_ID/r_reg[17]/synch_enable
-instruction_IF_ID/r_reg[18]/synch_enable
-instruction_IF_ID/r_reg[19]/synch_enable
-instruction_IF_ID/r_reg[20]/synch_enable
-instruction_IF_ID/r_reg[21]/synch_enable
-instruction_IF_ID/r_reg[22]/synch_enable
-instruction_IF_ID/r_reg[23]/synch_enable
-instruction_IF_ID/r_reg[24]/synch_enable
-instruction_IF_ID/r_reg[25]/synch_enable
-instruction_IF_ID/r_reg[26]/synch_enable
-instruction_IF_ID/r_reg[27]/synch_enable
-instruction_IF_ID/r_reg[28]/synch_enable
-instruction_IF_ID/r_reg[29]/synch_enable
-instruction_IF_ID/r_reg[30]/synch_enable
-instruction_IF_ID/r_reg[31]/synch_enable
 instruction_ME_WB/r_reg[0]/synch_enable
 instruction_ME_WB/r_reg[1]/synch_enable
 instruction_ME_WB/r_reg[2]/synch_enable
@@ -2874,70 +2901,6 @@ jump_PC_EX_ME/r_reg[60]/synch_enable
 jump_PC_EX_ME/r_reg[61]/synch_enable
 jump_PC_EX_ME/r_reg[62]/synch_enable
 jump_PC_EX_ME/r_reg[63]/synch_enable
-program_counter/pc_register/r_reg[0]/synch_enable
-program_counter/pc_register/r_reg[1]/synch_enable
-program_counter/pc_register/r_reg[2]/synch_enable
-program_counter/pc_register/r_reg[3]/synch_enable
-program_counter/pc_register/r_reg[4]/synch_enable
-program_counter/pc_register/r_reg[5]/synch_enable
-program_counter/pc_register/r_reg[6]/synch_enable
-program_counter/pc_register/r_reg[7]/synch_enable
-program_counter/pc_register/r_reg[8]/synch_enable
-program_counter/pc_register/r_reg[9]/synch_enable
-program_counter/pc_register/r_reg[10]/synch_enable
-program_counter/pc_register/r_reg[11]/synch_enable
-program_counter/pc_register/r_reg[12]/synch_enable
-program_counter/pc_register/r_reg[13]/synch_enable
-program_counter/pc_register/r_reg[14]/synch_enable
-program_counter/pc_register/r_reg[15]/synch_enable
-program_counter/pc_register/r_reg[16]/synch_enable
-program_counter/pc_register/r_reg[17]/synch_enable
-program_counter/pc_register/r_reg[18]/synch_enable
-program_counter/pc_register/r_reg[19]/synch_enable
-program_counter/pc_register/r_reg[20]/synch_enable
-program_counter/pc_register/r_reg[21]/synch_enable
-program_counter/pc_register/r_reg[22]/synch_enable
-program_counter/pc_register/r_reg[23]/synch_enable
-program_counter/pc_register/r_reg[24]/synch_enable
-program_counter/pc_register/r_reg[25]/synch_enable
-program_counter/pc_register/r_reg[26]/synch_enable
-program_counter/pc_register/r_reg[27]/synch_enable
-program_counter/pc_register/r_reg[28]/synch_enable
-program_counter/pc_register/r_reg[29]/synch_enable
-program_counter/pc_register/r_reg[30]/synch_enable
-program_counter/pc_register/r_reg[31]/synch_enable
-program_counter/pc_register/r_reg[32]/synch_enable
-program_counter/pc_register/r_reg[33]/synch_enable
-program_counter/pc_register/r_reg[34]/synch_enable
-program_counter/pc_register/r_reg[35]/synch_enable
-program_counter/pc_register/r_reg[36]/synch_enable
-program_counter/pc_register/r_reg[37]/synch_enable
-program_counter/pc_register/r_reg[38]/synch_enable
-program_counter/pc_register/r_reg[39]/synch_enable
-program_counter/pc_register/r_reg[40]/synch_enable
-program_counter/pc_register/r_reg[41]/synch_enable
-program_counter/pc_register/r_reg[42]/synch_enable
-program_counter/pc_register/r_reg[43]/synch_enable
-program_counter/pc_register/r_reg[44]/synch_enable
-program_counter/pc_register/r_reg[45]/synch_enable
-program_counter/pc_register/r_reg[46]/synch_enable
-program_counter/pc_register/r_reg[47]/synch_enable
-program_counter/pc_register/r_reg[48]/synch_enable
-program_counter/pc_register/r_reg[49]/synch_enable
-program_counter/pc_register/r_reg[50]/synch_enable
-program_counter/pc_register/r_reg[51]/synch_enable
-program_counter/pc_register/r_reg[52]/synch_enable
-program_counter/pc_register/r_reg[53]/synch_enable
-program_counter/pc_register/r_reg[54]/synch_enable
-program_counter/pc_register/r_reg[55]/synch_enable
-program_counter/pc_register/r_reg[56]/synch_enable
-program_counter/pc_register/r_reg[57]/synch_enable
-program_counter/pc_register/r_reg[58]/synch_enable
-program_counter/pc_register/r_reg[59]/synch_enable
-program_counter/pc_register/r_reg[60]/synch_enable
-program_counter/pc_register/r_reg[61]/synch_enable
-program_counter/pc_register/r_reg[62]/synch_enable
-program_counter/pc_register/r_reg[63]/synch_enable
 rdata_ext[0]
 rdata_ext[1]
 rdata_ext[2]
@@ -3098,70 +3061,6 @@ update_PC_ID_EX/r_reg[60]/synch_enable
 update_PC_ID_EX/r_reg[61]/synch_enable
 update_PC_ID_EX/r_reg[62]/synch_enable
 update_PC_ID_EX/r_reg[63]/synch_enable
-update_PC_IF_ID/r_reg[0]/synch_enable
-update_PC_IF_ID/r_reg[1]/synch_enable
-update_PC_IF_ID/r_reg[2]/synch_enable
-update_PC_IF_ID/r_reg[3]/synch_enable
-update_PC_IF_ID/r_reg[4]/synch_enable
-update_PC_IF_ID/r_reg[5]/synch_enable
-update_PC_IF_ID/r_reg[6]/synch_enable
-update_PC_IF_ID/r_reg[7]/synch_enable
-update_PC_IF_ID/r_reg[8]/synch_enable
-update_PC_IF_ID/r_reg[9]/synch_enable
-update_PC_IF_ID/r_reg[10]/synch_enable
-update_PC_IF_ID/r_reg[11]/synch_enable
-update_PC_IF_ID/r_reg[12]/synch_enable
-update_PC_IF_ID/r_reg[13]/synch_enable
-update_PC_IF_ID/r_reg[14]/synch_enable
-update_PC_IF_ID/r_reg[15]/synch_enable
-update_PC_IF_ID/r_reg[16]/synch_enable
-update_PC_IF_ID/r_reg[17]/synch_enable
-update_PC_IF_ID/r_reg[18]/synch_enable
-update_PC_IF_ID/r_reg[19]/synch_enable
-update_PC_IF_ID/r_reg[20]/synch_enable
-update_PC_IF_ID/r_reg[21]/synch_enable
-update_PC_IF_ID/r_reg[22]/synch_enable
-update_PC_IF_ID/r_reg[23]/synch_enable
-update_PC_IF_ID/r_reg[24]/synch_enable
-update_PC_IF_ID/r_reg[25]/synch_enable
-update_PC_IF_ID/r_reg[26]/synch_enable
-update_PC_IF_ID/r_reg[27]/synch_enable
-update_PC_IF_ID/r_reg[28]/synch_enable
-update_PC_IF_ID/r_reg[29]/synch_enable
-update_PC_IF_ID/r_reg[30]/synch_enable
-update_PC_IF_ID/r_reg[31]/synch_enable
-update_PC_IF_ID/r_reg[32]/synch_enable
-update_PC_IF_ID/r_reg[33]/synch_enable
-update_PC_IF_ID/r_reg[34]/synch_enable
-update_PC_IF_ID/r_reg[35]/synch_enable
-update_PC_IF_ID/r_reg[36]/synch_enable
-update_PC_IF_ID/r_reg[37]/synch_enable
-update_PC_IF_ID/r_reg[38]/synch_enable
-update_PC_IF_ID/r_reg[39]/synch_enable
-update_PC_IF_ID/r_reg[40]/synch_enable
-update_PC_IF_ID/r_reg[41]/synch_enable
-update_PC_IF_ID/r_reg[42]/synch_enable
-update_PC_IF_ID/r_reg[43]/synch_enable
-update_PC_IF_ID/r_reg[44]/synch_enable
-update_PC_IF_ID/r_reg[45]/synch_enable
-update_PC_IF_ID/r_reg[46]/synch_enable
-update_PC_IF_ID/r_reg[47]/synch_enable
-update_PC_IF_ID/r_reg[48]/synch_enable
-update_PC_IF_ID/r_reg[49]/synch_enable
-update_PC_IF_ID/r_reg[50]/synch_enable
-update_PC_IF_ID/r_reg[51]/synch_enable
-update_PC_IF_ID/r_reg[52]/synch_enable
-update_PC_IF_ID/r_reg[53]/synch_enable
-update_PC_IF_ID/r_reg[54]/synch_enable
-update_PC_IF_ID/r_reg[55]/synch_enable
-update_PC_IF_ID/r_reg[56]/synch_enable
-update_PC_IF_ID/r_reg[57]/synch_enable
-update_PC_IF_ID/r_reg[58]/synch_enable
-update_PC_IF_ID/r_reg[59]/synch_enable
-update_PC_IF_ID/r_reg[60]/synch_enable
-update_PC_IF_ID/r_reg[61]/synch_enable
-update_PC_IF_ID/r_reg[62]/synch_enable
-update_PC_IF_ID/r_reg[63]/synch_enable
 
 Information: Checking pulse_clock_cell_type...
 
@@ -3214,13 +3113,14 @@ Information: Evaluating DesignWare library utilization. (UISN-27)
 ============================================================================
 
 
-Information: There are 291 potential problems in your design. Please run 'check_design' for more information. (LINT-99)
+Information: There are 305 potential problems in your design. Please run 'check_design' for more information. (LINT-99)
 
 Information: Uniquified 11 instances of design 'reg_arstn_en_DATA_W64'. (OPT-1056)
 Information: Uniquified 4 instances of design 'reg_arstn_en_DATA_W32'. (OPT-1056)
 Information: Uniquified 2 instances of design 'reg_arstn_en_DATA_W4'. (OPT-1056)
 Information: Uniquified 3 instances of design 'reg_arstn_en_DATA_W2'. (OPT-1056)
 Information: Uniquified 4 instances of design 'mux_2_DATA_W64'. (OPT-1056)
+Information: Uniquified 2 instances of design 'mux_3_DATA_W64'. (OPT-1056)
   Simplifying Design 'cpu'
 
   Loading target library 'saed32sram_tt1p05v25c'
@@ -3295,13 +3195,21 @@ Information: In design 'register_file_DATA_W64', the register 'reg_array_reg[0][
 Information: In design 'register_file_DATA_W64', the register 'reg_array_reg[0][62]' is removed because it is merged to 'reg_array_reg[0][0]'. (OPT-1215)
 Information: In design 'register_file_DATA_W64', the register 'reg_array_reg[0][63]' is removed because it is merged to 'reg_array_reg[0][0]'. (OPT-1215)
 Information: The register 'reg_array_reg[0][0]' is a constant and will be removed. (OPT-1206)
-  Processing 'cpu'
+  Processing 'alu_DATA_W64'
+ Implement Synthetic for 'alu_DATA_W64'.
+Information: Added key list 'DesignWare' to design 'alu_DATA_W64'. (DDB-72)
+  Processing 'sram_BW32_ADDR_W9_DATA_W32'
+  Processing 'reg_arstn_en_DATA_W64_0'
+  Processing 'reg_arstn_en_64_s00000000'
   Processing 'branch_unit_DATA_W64'
  Implement Synthetic for 'branch_unit_DATA_W64'.
-  Processing 'alu_control'
-  Processing 'reg_arstn_en_DATA_W32_0'
-  Processing 'reg_arstn_en_DATA_W3'
-  Processing 'SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_2'
+  Processing 'control_unit'
+  Processing 'immediate_extend_unit'
+  Processing 'reg_arstn_en_DATA_W4_1'
+  Processing 'mux_2_DATA_W10'
+  Processing 'SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_0_0'
+  Mapping integrated clock gating circuitry
+  Processing 'SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W4_0'
   Mapping integrated clock gating circuitry
   Processing 'SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W32_0_0'
   Mapping integrated clock gating circuitry
@@ -3311,27 +3219,28 @@ Information: The register 'reg_array_reg[0][0]' is a constant and will be remove
   Processing 'reg_arstn_en_DATA_W64_2'
   Processing 'pc_DATA_W64'
  Implement Synthetic for 'pc_DATA_W64'.
-  Processing 'mux_2_DATA_W64_2'
-  Processing 'immediate_extend_unit'
+  Processing 'reg_arstn_en_DATA_W32_3'
+  Processing 'reg_arstn_en_DATA_W32_2'
+  Processing 'forward_unit'
+Information: Added key list 'DesignWare' to design 'forward_unit'. (DDB-72)
+  Processing 'reg_arstn_en_DATA_W32_0'
   Processing 'reg_arstn_en_DATA_W4_0'
-  Processing 'SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_0_0'
+  Processing 'hazard_detection'
+Information: Added key list 'DesignWare' to design 'hazard_detection'. (DDB-72)
+  Processing 'SNPS_CLOCK_GATE_HIGH_register_file_DATA_W64_0'
   Mapping integrated clock gating circuitry
-  Processing 'SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W4_0_0'
+  Processing 'SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W4_1'
   Mapping integrated clock gating circuitry
   Processing 'SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W32_2'
   Mapping integrated clock gating circuitry
   Processing 'reg_arstn_en_DATA_W1'
-  Processing 'alu_DATA_W64'
- Implement Synthetic for 'alu_DATA_W64'.
-Information: Added key list 'DesignWare' to design 'alu_DATA_W64'. (DDB-72)
-  Processing 'sram_BW32_ADDR_W9_DATA_W32'
-  Processing 'reg_arstn_en_DATA_W64_0'
-  Processing 'reg_arstn_en_64_s00000000'
-  Processing 'reg_arstn_en_DATA_W32_3'
-  Processing 'control_unit'
-  Processing 'reg_arstn_en_DATA_W32_2'
+  Processing 'cpu'
+  Processing 'mux_3_DATA_W64_0'
+  Processing 'mux_2_DATA_W64_2'
+  Processing 'alu_control'
+  Processing 'reg_arstn_en_DATA_W3'
   Processing 'reg_arstn_en_DATA_W2_0'
-  Processing 'SNPS_CLOCK_GATE_HIGH_register_file_DATA_W64_0'
+  Processing 'SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_2'
   Mapping integrated clock gating circuitry
   Processing 'SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W3'
   Mapping integrated clock gating circuitry
@@ -3357,25 +3266,26 @@ Information: Skipping clock gating on design alu_control, since there are no reg
 Information: Skipping clock gating on design mux_2_DATA_W64_3, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design alu_DATA_W64, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design branch_unit_DATA_W64, since there are no registers. (PWR-806)
+Information: Skipping clock gating on design forward_unit, since there are no registers. (PWR-806)
+Information: Skipping clock gating on design mux_3_DATA_W64_1, since there are no registers. (PWR-806)
+Information: Skipping clock gating on design hazard_detection, since there are no registers. (PWR-806)
+Information: Skipping clock gating on design mux_2_DATA_W10, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design pc_DATA_W64_DW01_add_J3_0, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_0_9, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W32_3, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W32_2, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W32_0_1, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W3, since there are no registers. (PWR-806)
-Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W4_0_1, since there are no registers. (PWR-806)
+Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W4_1, since there are no registers. (PWR-806)
+Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W4_0, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_2, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_register_file_DATA_W64_0, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design alu_DATA_W64_RSOP_12, since there are no registers. (PWR-806)
-Information: Skipping clock gating on design alu_DATA_W64_DW02_mult_J4_0, since there are no registers. (PWR-806)
-Information: Skipping clock gating on design alu_DATA_W64_DW_cmp_J4_0, since there are no registers. (PWR-806)
-Information: Skipping clock gating on design branch_unit_DATA_W64_DP_OP_9J2_122_763_J2_0, since there are no registers. (PWR-806)
+Information: Skipping clock gating on design alu_DATA_W64_DW02_mult_J2_0, since there are no registers. (PWR-806)
+Information: Skipping clock gating on design alu_DATA_W64_DW_cmp_J2_0, since there are no registers. (PWR-806)
+Information: Skipping clock gating on design branch_unit_DATA_W64_DP_OP_9J2_125_763_J2_0, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_64_s00000000, since there are no registers. (PWR-806)
-Information: Skipping clock gating on design alu_DATA_W64_DP_OP_18J4_122_7052_J4_0, since there are no registers. (PWR-806)
-Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W32_0_0, since there are no registers. (PWR-806)
-Information: Skipping clock gating on design mux_2_DATA_W64_0, since there are no registers. (PWR-806)
-Information: Skipping clock gating on design mux_2_DATA_W64_1, since there are no registers. (PWR-806)
-Information: Skipping clock gating on design mux_2_DATA_W64_2, since there are no registers. (PWR-806)
+Information: Skipping clock gating on design alu_DATA_W64_DP_OP_18J2_122_7052_J2_0, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_0_0, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_0_1, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_0_2, since there are no registers. (PWR-806)
@@ -3385,7 +3295,7 @@ Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_D
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_0_6, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_0_7, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W64_0_8, since there are no registers. (PWR-806)
-Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W4_0_0, since there are no registers. (PWR-806)
+Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_reg_arstn_en_DATA_W32_0_0, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_register_file_DATA_W64_1, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_register_file_DATA_W64_2, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_register_file_DATA_W64_3, since there are no registers. (PWR-806)
@@ -3416,6 +3326,10 @@ Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_register_file_
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_register_file_DATA_W64_28, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_register_file_DATA_W64_29, since there are no registers. (PWR-806)
 Information: Skipping clock gating on design SNPS_CLOCK_GATE_HIGH_register_file_DATA_W64_30, since there are no registers. (PWR-806)
+Information: Skipping clock gating on design mux_3_DATA_W64_0, since there are no registers. (PWR-806)
+Information: Skipping clock gating on design mux_2_DATA_W64_0, since there are no registers. (PWR-806)
+Information: Skipping clock gating on design mux_2_DATA_W64_1, since there are no registers. (PWR-806)
+Information: Skipping clock gating on design mux_2_DATA_W64_2, since there are no registers. (PWR-806)
 Information: Performing clock-gating on design reg_arstn_en_DATA_W2_2. (PWR-730)
 Information: Performing clock-gating on design reg_arstn_en_DATA_W2_0. (PWR-730)
 Information: Performing clock-gating on design reg_arstn_en_DATA_W2_1. (PWR-730)
@@ -3423,11 +3337,10 @@ Information: Performing clock-gating on design reg_arstn_en_DATA_W1. (PWR-730)
 Information: Performing clock-gating on design reg_arstn_en_DATA_W64_10. (PWR-730)
 Information: Performing clock-gating on design reg_arstn_en_DATA_W3. (PWR-730)
 Information: Performing clock-gating on design reg_arstn_en_DATA_W4_1. (PWR-730)
+Information: Performing clock-gating on design reg_arstn_en_DATA_W4_0. (PWR-730)
 Information: Performing clock-gating on design reg_arstn_en_DATA_W64_2. (PWR-730)
 Information: Performing clock-gating on design register_file_DATA_W64. (PWR-730)
 Information: Performing clock-gating on design reg_arstn_en_64_s00000000. (PWR-730)
-Information: Performing clock-gating on design reg_arstn_en_DATA_W32_0. (PWR-730)
-Information: Performing clock-gating on design reg_arstn_en_DATA_W4_0. (PWR-730)
 Information: Performing clock-gating on design reg_arstn_en_DATA_W64_0. (PWR-730)
 Information: Performing clock-gating on design reg_arstn_en_DATA_W64_1. (PWR-730)
 Information: Performing clock-gating on design reg_arstn_en_DATA_W64_3. (PWR-730)
@@ -3437,6 +3350,7 @@ Information: Performing clock-gating on design reg_arstn_en_DATA_W64_6. (PWR-730
 Information: Performing clock-gating on design reg_arstn_en_DATA_W64_7. (PWR-730)
 Information: Performing clock-gating on design reg_arstn_en_DATA_W64_8. (PWR-730)
 Information: Performing clock-gating on design reg_arstn_en_DATA_W64_9. (PWR-730)
+Information: Performing clock-gating on design reg_arstn_en_DATA_W32_0. (PWR-730)
 Information: Performing clock-gating on design reg_arstn_en_DATA_W32_3. (PWR-730)
 Information: Performing clock-gating on design reg_arstn_en_DATA_W32_2. (PWR-730)
 Information: Performing clock-gating on design reg_arstn_en_DATA_W32_1. (PWR-730)
@@ -3515,36 +3429,36 @@ Threshold voltage group cell usage:
    ELAPSED            WORST NEG   SETUP    DESIGN                              LEAKAGE 
     TIME      AREA      SLACK     COST    RULE COST         ENDPOINT            POWER  
   --------- --------- --------- --------- --------- ------------------------- ---------
-    0:00:48  424340.8      0.00       0.0      53.5                           1247969152.0000
-    0:00:48  424340.8      0.00       0.0      53.5                           1247969152.0000
-    0:00:48  424340.8      0.00       0.0      53.5                           1247969152.0000
-    0:00:48  424340.8      0.00       0.0      53.5                           1247969152.0000
+    0:01:01  425494.3      0.00       0.0     274.5                           1282301952.0000
+    0:01:01  425494.3      0.00       0.0     274.5                           1282301952.0000
+    0:01:01  425494.3      0.00       0.0     274.5                           1282301952.0000
+    0:01:01  425494.3      0.00       0.0     274.5                           1282301952.0000
 
 Threshold voltage group cell usage:
 >> saed32cell_svt 100.00%
 
   Beginning WLM Backend Optimization
   --------------------------------------
-    0:00:52  423894.2      0.00       0.0      53.1                           1231658496.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
+    0:01:07  424583.2      0.00       0.0      38.3                           1248177792.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:07  424573.8      0.00       0.0      67.9                           1248103552.0000
 
 
   Beginning Design Rule Fixing  (max_transition)
@@ -3554,12 +3468,12 @@ Threshold voltage group cell usage:
    ELAPSED            WORST NEG   SETUP    DESIGN                              LEAKAGE 
     TIME      AREA      SLACK     COST    RULE COST         ENDPOINT            POWER  
   --------- --------- --------- --------- --------- ------------------------- ---------
-    0:00:53  423884.8      0.00       0.0      82.8                           1231584256.0000
+    0:01:08  424573.8      0.00       0.0      67.9                           1248103552.0000
   Global Optimization (Phase 32)
   Global Optimization (Phase 33)
   Global Optimization (Phase 34)
-    0:00:55  423884.8      0.00       0.0      82.8                           1231584256.0000
-    0:00:55  423884.8      0.00       0.0      82.8                           1231584256.0000
+    0:01:10  424573.8      0.00       0.0      67.9                           1248103552.0000
+    0:01:10  424573.8      0.00       0.0      67.9                           1248103552.0000
 
 Threshold voltage group cell usage:
 >> saed32cell_svt 100.00%
@@ -3572,7 +3486,7 @@ Threshold voltage group cell usage:
    ELAPSED            WORST NEG   SETUP    DESIGN                              LEAKAGE 
     TIME      AREA      SLACK     COST    RULE COST         ENDPOINT            POWER  
   --------- --------- --------- --------- --------- ------------------------- ---------
-    0:00:55  423884.8      0.00       0.0      82.8                           1231584256.0000
+    0:01:10  424573.8      0.00       0.0      67.9                           1248103552.0000
   Global Optimization (Phase 35)
   Global Optimization (Phase 36)
   Global Optimization (Phase 37)
@@ -3584,44 +3498,44 @@ Threshold voltage group cell usage:
   Global Optimization (Phase 43)
   Global Optimization (Phase 44)
   Global Optimization (Phase 45)
-  Global Optimization (Phase 46)
-    0:00:56  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:56  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:56  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
+    0:01:12  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:12  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:12  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:13  424573.6      0.00       0.0      67.9                           1248103552.0000
 
                                   TOTAL                                                
    ELAPSED            WORST NEG   SETUP    DESIGN                              LEAKAGE 
     TIME      AREA      SLACK     COST    RULE COST         ENDPOINT            POWER  
   --------- --------- --------- --------- --------- ------------------------- ---------
-    0:00:57  423874.4      0.00       0.0      82.8                           1231220736.0000
-    0:00:58  424803.8      0.00       0.0     792.2                           1231220736.0000
-    0:00:58  424803.8      0.00       0.0     792.2                           1231220736.0000
-    0:00:58  424803.8      0.00       0.0     792.2                           1231220736.0000
-    0:01:00  424043.7      0.00       0.0     103.0                           1231220736.0000
-    0:01:04  423983.2      0.00       0.0     103.0                           1231220736.0000
-    0:01:04  423983.2      0.00       0.0     103.0                           1231220736.0000
-    0:01:04  423983.2      0.00       0.0     103.0                           1231220736.0000
-    0:01:04  423983.2      0.00       0.0     103.0                           1231220736.0000
-    0:01:07  423881.0      0.00       0.0     103.0                           1231220736.0000
+    0:01:14  424573.6      0.00       0.0      67.9                           1248103552.0000
+    0:01:15  425558.6      0.00       0.0     787.1                           1248103552.0000
+    0:01:15  425558.6      0.00       0.0     787.1                           1248103552.0000
+    0:01:15  425558.6      0.00       0.0     787.1                           1248103552.0000
+    0:01:18  424745.6      0.00       0.0      92.5                           1248103552.0000
+    0:01:22  424702.9      0.00       0.0      92.5 alu/alu_in_1[0]           1248312960.0000
+    0:01:23  424702.9      0.00       0.0      92.5                           1248312960.0000
+    0:01:23  424702.9      0.00       0.0      92.5                           1248312960.0000
+    0:01:23  424702.9      0.00       0.0      92.5                           1248312960.0000
+    0:01:23  424702.9      0.00       0.0      92.5                           1248312960.0000
+    0:01:26  424585.8      0.00       0.0      92.5                           1248312960.0000
 
 
 Note: Symbol # after min delay cost means estimated hold TNS across all active scenarios 
@@ -3630,7 +3544,7 @@ Note: Symbol # after min delay cost means estimated hold TNS across all active s
   Optimization Complete
   ---------------------
 Warning: Design 'cpu' contains 1 high-fanout nets. A fanout number of 1000 will be used for delay calculations involving these nets. (TIM-134)
-     Net 'ALU_ZERO_EX_ME/arst_n': 2555 load(s), 1 driver(s)
+     Net 'ALU_ZERO_EX_ME/arst_n': 2566 load(s), 1 driver(s)
   Loading target library 'saed32sram_tt1p05v25c'
 Information: State dependent leakage is now switched from off to on.
 Information: Propagating switching activity (low effort zero delay simulation). (PWR-6)
@@ -3642,7 +3556,7 @@ report_resources -hierarchy -minpower
 Report : resources
 Design : cpu
 Version: N-2017.09-SP3
-Date   : Thu Mar 17 18:41:37 2022
+Date   : Tue Mar 29 02:10:04 2022
 ****************************************
 
 
@@ -3793,6 +3707,36 @@ Design : mux_2_DATA_W64_2
 No minpower implementations to report
  
 ****************************************
+Design : mux_3_DATA_W64_0
+****************************************
+
+No minpower implementations to report
+ 
+****************************************
+Design : mux_2_DATA_W10
+****************************************
+
+No minpower implementations to report
+ 
+****************************************
+Design : hazard_detection
+****************************************
+
+No minpower implementations to report
+ 
+****************************************
+Design : mux_3_DATA_W64_1
+****************************************
+
+No minpower implementations to report
+ 
+****************************************
+Design : forward_unit
+****************************************
+
+No minpower implementations to report
+ 
+****************************************
 Design : branch_unit_DATA_W64
 ****************************************
 
@@ -3879,7 +3823,6 @@ Warning: In the design immediate_extend_unit, net 'instruction[28]' is connectin
 Warning: In the design immediate_extend_unit, net 'instruction[27]' is connecting multiple ports. (UCN-1)
 Warning: In the design immediate_extend_unit, net 'instruction[26]' is connecting multiple ports. (UCN-1)
 Warning: In the design immediate_extend_unit, net 'instruction[25]' is connecting multiple ports. (UCN-1)
-Warning: In the design control_unit, net 'alu_op[0]' is connecting multiple ports. (UCN-1)
 Warning: In the design branch_unit_DATA_W64, net 'branch_pc[10]' is connecting multiple ports. (UCN-1)
 Warning: In the design branch_unit_DATA_W64, net 'branch_pc[9]' is connecting multiple ports. (UCN-1)
 Warning: In the design branch_unit_DATA_W64, net 'branch_pc[8]' is connecting multiple ports. (UCN-1)
@@ -3891,6 +3834,9 @@ Warning: In the design branch_unit_DATA_W64, net 'branch_pc[3]' is connecting mu
 Warning: In the design branch_unit_DATA_W64, net 'branch_pc[2]' is connecting multiple ports. (UCN-1)
 Warning: In the design branch_unit_DATA_W64, net 'branch_pc[1]' is connecting multiple ports. (UCN-1)
 Warning: In the design branch_unit_DATA_W64, net 'branch_pc[0]' is connecting multiple ports. (UCN-1)
+Warning: In the design hazard_detection, net 'hazardMux' is connecting multiple ports. (UCN-1)
+Warning: In the design mux_2_DATA_W10, net 'mux_out[6]' is connecting multiple ports. (UCN-1)
+Warning: In the design mux_2_DATA_W10, net 'mux_out[4]' is connecting multiple ports. (UCN-1)
 1
 define_name_rules name_rule -allowed "A-Z a-z 0-9 _" -max_length 255 -type cell
 1
@@ -3908,7 +3854,6 @@ Warning: In the design immediate_extend_unit, net 'instruction[28]' is connectin
 Warning: In the design immediate_extend_unit, net 'instruction[27]' is connecting multiple ports. (UCN-1)
 Warning: In the design immediate_extend_unit, net 'instruction[26]' is connecting multiple ports. (UCN-1)
 Warning: In the design immediate_extend_unit, net 'instruction[25]' is connecting multiple ports. (UCN-1)
-Warning: In the design control_unit, net 'alu_op[0]' is connecting multiple ports. (UCN-1)
 Warning: In the design branch_unit_DATA_W64, net 'branch_pc[10]' is connecting multiple ports. (UCN-1)
 Warning: In the design branch_unit_DATA_W64, net 'branch_pc[9]' is connecting multiple ports. (UCN-1)
 Warning: In the design branch_unit_DATA_W64, net 'branch_pc[8]' is connecting multiple ports. (UCN-1)
@@ -3920,314 +3865,308 @@ Warning: In the design branch_unit_DATA_W64, net 'branch_pc[3]' is connecting mu
 Warning: In the design branch_unit_DATA_W64, net 'branch_pc[2]' is connecting multiple ports. (UCN-1)
 Warning: In the design branch_unit_DATA_W64, net 'branch_pc[1]' is connecting multiple ports. (UCN-1)
 Warning: In the design branch_unit_DATA_W64, net 'branch_pc[0]' is connecting multiple ports. (UCN-1)
+Warning: In the design hazard_detection, net 'hazardMux' is connecting multiple ports. (UCN-1)
+Warning: In the design mux_2_DATA_W10, net 'mux_out[6]' is connecting multiple ports. (UCN-1)
+Warning: In the design mux_2_DATA_W10, net 'mux_out[4]' is connecting multiple ports. (UCN-1)
 1
 check_design
  
 ****************************************
 check_design summary:
 Version:     N-2017.09-SP3
-Date:        Thu Mar 17 18:41:37 2022
+Date:        Tue Mar 29 02:10:05 2022
 ****************************************
 
                    Name                                            Total
 --------------------------------------------------------------------------------
-Inputs/Outputs                                                   1907
-    Unconnected ports (LINT-28)                                  1802
+Inputs/Outputs                                                   1903
+    Unconnected ports (LINT-28)                                  1796
     Feedthrough (LINT-29)                                          50
-    Shorted outputs (LINT-31)                                      55
+    Shorted outputs (LINT-31)                                      57
 
-Cells                                                            1076
-    Connected to power or ground (LINT-32)                       1075
-    Nets connected to multiple pins on same cell (LINT-33)          1
+Cells                                                            1084
+    Connected to power or ground (LINT-32)                       1077
+    Nets connected to multiple pins on same cell (LINT-33)          7
 
-Nets                                                              662
-    Unloaded nets (LINT-2)                                        662
+Nets                                                              653
+    Unloaded nets (LINT-2)                                        653
 --------------------------------------------------------------------------------
 
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_503' driven by pin 'branch_unit/jump_pc[11]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_502' driven by pin 'branch_unit/jump_pc[12]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_501' driven by pin 'branch_unit/jump_pc[13]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_500' driven by pin 'branch_unit/jump_pc[14]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_499' driven by pin 'branch_unit/jump_pc[15]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_498' driven by pin 'branch_unit/jump_pc[16]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_497' driven by pin 'branch_unit/jump_pc[17]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_496' driven by pin 'branch_unit/jump_pc[18]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_495' driven by pin 'branch_unit/jump_pc[19]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_494' driven by pin 'branch_unit/jump_pc[20]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_493' driven by pin 'branch_unit/jump_pc[21]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_492' driven by pin 'branch_unit/jump_pc[22]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_491' driven by pin 'branch_unit/jump_pc[23]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_490' driven by pin 'branch_unit/jump_pc[24]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_489' driven by pin 'branch_unit/jump_pc[25]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_488' driven by pin 'branch_unit/jump_pc[26]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_487' driven by pin 'branch_unit/jump_pc[27]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_486' driven by pin 'branch_unit/jump_pc[28]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_485' driven by pin 'branch_unit/jump_pc[29]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_484' driven by pin 'branch_unit/jump_pc[30]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_483' driven by pin 'branch_unit/jump_pc[31]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_482' driven by pin 'branch_unit/jump_pc[32]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_481' driven by pin 'branch_unit/jump_pc[33]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_480' driven by pin 'branch_unit/jump_pc[34]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_479' driven by pin 'branch_unit/jump_pc[35]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_478' driven by pin 'branch_unit/jump_pc[36]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_477' driven by pin 'branch_unit/jump_pc[37]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_476' driven by pin 'branch_unit/jump_pc[38]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_475' driven by pin 'branch_unit/jump_pc[39]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_474' driven by pin 'branch_unit/jump_pc[40]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_473' driven by pin 'branch_unit/jump_pc[41]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_472' driven by pin 'branch_unit/jump_pc[42]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_471' driven by pin 'branch_unit/jump_pc[43]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_470' driven by pin 'branch_unit/jump_pc[44]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_469' driven by pin 'branch_unit/jump_pc[45]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_468' driven by pin 'branch_unit/jump_pc[46]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_467' driven by pin 'branch_unit/jump_pc[47]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_466' driven by pin 'branch_unit/jump_pc[48]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_465' driven by pin 'branch_unit/jump_pc[49]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_464' driven by pin 'branch_unit/jump_pc[50]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_463' driven by pin 'branch_unit/jump_pc[51]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_462' driven by pin 'branch_unit/jump_pc[52]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_461' driven by pin 'branch_unit/jump_pc[53]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_460' driven by pin 'branch_unit/jump_pc[54]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_459' driven by pin 'branch_unit/jump_pc[55]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_458' driven by pin 'branch_unit/jump_pc[56]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_457' driven by pin 'branch_unit/jump_pc[57]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_456' driven by pin 'branch_unit/jump_pc[58]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_455' driven by pin 'branch_unit/jump_pc[59]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_454' driven by pin 'branch_unit/jump_pc[60]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_453' driven by pin 'branch_unit/jump_pc[61]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_452' driven by pin 'branch_unit/jump_pc[62]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_451' driven by pin 'branch_unit/jump_pc[63]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_450' driven by pin 'branch_unit/branch_pc[11]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_449' driven by pin 'branch_unit/branch_pc[12]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_448' driven by pin 'branch_unit/branch_pc[13]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_447' driven by pin 'branch_unit/branch_pc[14]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_446' driven by pin 'branch_unit/branch_pc[15]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_445' driven by pin 'branch_unit/branch_pc[16]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_444' driven by pin 'branch_unit/branch_pc[17]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_443' driven by pin 'branch_unit/branch_pc[18]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_442' driven by pin 'branch_unit/branch_pc[19]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_441' driven by pin 'branch_unit/branch_pc[20]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_440' driven by pin 'branch_unit/branch_pc[21]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_439' driven by pin 'branch_unit/branch_pc[22]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_438' driven by pin 'branch_unit/branch_pc[23]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_437' driven by pin 'branch_unit/branch_pc[24]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_436' driven by pin 'branch_unit/branch_pc[25]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_435' driven by pin 'branch_unit/branch_pc[26]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_434' driven by pin 'branch_unit/branch_pc[27]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_433' driven by pin 'branch_unit/branch_pc[28]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_432' driven by pin 'branch_unit/branch_pc[29]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_431' driven by pin 'branch_unit/branch_pc[30]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_430' driven by pin 'branch_unit/branch_pc[31]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_429' driven by pin 'branch_unit/branch_pc[32]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_428' driven by pin 'branch_unit/branch_pc[33]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_427' driven by pin 'branch_unit/branch_pc[34]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_426' driven by pin 'branch_unit/branch_pc[35]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_425' driven by pin 'branch_unit/branch_pc[36]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_424' driven by pin 'branch_unit/branch_pc[37]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_423' driven by pin 'branch_unit/branch_pc[38]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_422' driven by pin 'branch_unit/branch_pc[39]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_421' driven by pin 'branch_unit/branch_pc[40]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_420' driven by pin 'branch_unit/branch_pc[41]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_419' driven by pin 'branch_unit/branch_pc[42]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_418' driven by pin 'branch_unit/branch_pc[43]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_417' driven by pin 'branch_unit/branch_pc[44]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_416' driven by pin 'branch_unit/branch_pc[45]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_415' driven by pin 'branch_unit/branch_pc[46]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_414' driven by pin 'branch_unit/branch_pc[47]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_413' driven by pin 'branch_unit/branch_pc[48]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_412' driven by pin 'branch_unit/branch_pc[49]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_411' driven by pin 'branch_unit/branch_pc[50]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_410' driven by pin 'branch_unit/branch_pc[51]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_409' driven by pin 'branch_unit/branch_pc[52]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_408' driven by pin 'branch_unit/branch_pc[53]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_407' driven by pin 'branch_unit/branch_pc[54]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_406' driven by pin 'branch_unit/branch_pc[55]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_405' driven by pin 'branch_unit/branch_pc[56]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_404' driven by pin 'branch_unit/branch_pc[57]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_403' driven by pin 'branch_unit/branch_pc[58]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_402' driven by pin 'branch_unit/branch_pc[59]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_401' driven by pin 'branch_unit/branch_pc[60]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_400' driven by pin 'branch_unit/branch_pc[61]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_399' driven by pin 'branch_unit/branch_pc[62]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_398' driven by pin 'branch_unit/branch_pc[63]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_397' driven by pin 'jump_PC_EX_ME/dout[11]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_396' driven by pin 'jump_PC_EX_ME/dout[12]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_395' driven by pin 'jump_PC_EX_ME/dout[13]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_394' driven by pin 'jump_PC_EX_ME/dout[14]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_393' driven by pin 'jump_PC_EX_ME/dout[15]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_392' driven by pin 'jump_PC_EX_ME/dout[16]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_391' driven by pin 'jump_PC_EX_ME/dout[17]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_390' driven by pin 'jump_PC_EX_ME/dout[18]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_389' driven by pin 'jump_PC_EX_ME/dout[19]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_388' driven by pin 'jump_PC_EX_ME/dout[20]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_387' driven by pin 'jump_PC_EX_ME/dout[21]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_386' driven by pin 'jump_PC_EX_ME/dout[22]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_385' driven by pin 'jump_PC_EX_ME/dout[23]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_384' driven by pin 'jump_PC_EX_ME/dout[24]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_383' driven by pin 'jump_PC_EX_ME/dout[25]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_382' driven by pin 'jump_PC_EX_ME/dout[26]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_381' driven by pin 'jump_PC_EX_ME/dout[27]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_380' driven by pin 'jump_PC_EX_ME/dout[28]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_379' driven by pin 'jump_PC_EX_ME/dout[29]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_378' driven by pin 'jump_PC_EX_ME/dout[30]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_377' driven by pin 'jump_PC_EX_ME/dout[31]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_376' driven by pin 'jump_PC_EX_ME/dout[32]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_375' driven by pin 'jump_PC_EX_ME/dout[33]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_374' driven by pin 'jump_PC_EX_ME/dout[34]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_373' driven by pin 'jump_PC_EX_ME/dout[35]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_372' driven by pin 'jump_PC_EX_ME/dout[36]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_371' driven by pin 'jump_PC_EX_ME/dout[37]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_370' driven by pin 'jump_PC_EX_ME/dout[38]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_369' driven by pin 'jump_PC_EX_ME/dout[39]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_368' driven by pin 'jump_PC_EX_ME/dout[40]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_367' driven by pin 'jump_PC_EX_ME/dout[41]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_366' driven by pin 'jump_PC_EX_ME/dout[42]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_365' driven by pin 'jump_PC_EX_ME/dout[43]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_364' driven by pin 'jump_PC_EX_ME/dout[44]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_363' driven by pin 'jump_PC_EX_ME/dout[45]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_362' driven by pin 'jump_PC_EX_ME/dout[46]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_361' driven by pin 'jump_PC_EX_ME/dout[47]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_360' driven by pin 'jump_PC_EX_ME/dout[48]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_359' driven by pin 'jump_PC_EX_ME/dout[49]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_358' driven by pin 'jump_PC_EX_ME/dout[50]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_357' driven by pin 'jump_PC_EX_ME/dout[51]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_356' driven by pin 'jump_PC_EX_ME/dout[52]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_355' driven by pin 'jump_PC_EX_ME/dout[53]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_354' driven by pin 'jump_PC_EX_ME/dout[54]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_353' driven by pin 'jump_PC_EX_ME/dout[55]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_352' driven by pin 'jump_PC_EX_ME/dout[56]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_351' driven by pin 'jump_PC_EX_ME/dout[57]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_350' driven by pin 'jump_PC_EX_ME/dout[58]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_349' driven by pin 'jump_PC_EX_ME/dout[59]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_348' driven by pin 'jump_PC_EX_ME/dout[60]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_347' driven by pin 'jump_PC_EX_ME/dout[61]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_346' driven by pin 'jump_PC_EX_ME/dout[62]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_345' driven by pin 'jump_PC_EX_ME/dout[63]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_344' driven by pin 'branch_PC_EX_ME/dout[11]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_343' driven by pin 'branch_PC_EX_ME/dout[12]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_342' driven by pin 'branch_PC_EX_ME/dout[13]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_341' driven by pin 'branch_PC_EX_ME/dout[14]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_340' driven by pin 'branch_PC_EX_ME/dout[15]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_339' driven by pin 'branch_PC_EX_ME/dout[16]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_338' driven by pin 'branch_PC_EX_ME/dout[17]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_337' driven by pin 'branch_PC_EX_ME/dout[18]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_336' driven by pin 'branch_PC_EX_ME/dout[19]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_335' driven by pin 'branch_PC_EX_ME/dout[20]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_334' driven by pin 'branch_PC_EX_ME/dout[21]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_333' driven by pin 'branch_PC_EX_ME/dout[22]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_332' driven by pin 'branch_PC_EX_ME/dout[23]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_331' driven by pin 'branch_PC_EX_ME/dout[24]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_330' driven by pin 'branch_PC_EX_ME/dout[25]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_329' driven by pin 'branch_PC_EX_ME/dout[26]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_328' driven by pin 'branch_PC_EX_ME/dout[27]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_327' driven by pin 'branch_PC_EX_ME/dout[28]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_326' driven by pin 'branch_PC_EX_ME/dout[29]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_325' driven by pin 'branch_PC_EX_ME/dout[30]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_324' driven by pin 'branch_PC_EX_ME/dout[31]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_323' driven by pin 'branch_PC_EX_ME/dout[32]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_322' driven by pin 'branch_PC_EX_ME/dout[33]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_321' driven by pin 'branch_PC_EX_ME/dout[34]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_320' driven by pin 'branch_PC_EX_ME/dout[35]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_319' driven by pin 'branch_PC_EX_ME/dout[36]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_318' driven by pin 'branch_PC_EX_ME/dout[37]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_317' driven by pin 'branch_PC_EX_ME/dout[38]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_316' driven by pin 'branch_PC_EX_ME/dout[39]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_315' driven by pin 'branch_PC_EX_ME/dout[40]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_314' driven by pin 'branch_PC_EX_ME/dout[41]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_313' driven by pin 'branch_PC_EX_ME/dout[42]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_312' driven by pin 'branch_PC_EX_ME/dout[43]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_311' driven by pin 'branch_PC_EX_ME/dout[44]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_310' driven by pin 'branch_PC_EX_ME/dout[45]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_309' driven by pin 'branch_PC_EX_ME/dout[46]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_308' driven by pin 'branch_PC_EX_ME/dout[47]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_307' driven by pin 'branch_PC_EX_ME/dout[48]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_306' driven by pin 'branch_PC_EX_ME/dout[49]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_305' driven by pin 'branch_PC_EX_ME/dout[50]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_304' driven by pin 'branch_PC_EX_ME/dout[51]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_303' driven by pin 'branch_PC_EX_ME/dout[52]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_302' driven by pin 'branch_PC_EX_ME/dout[53]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_301' driven by pin 'branch_PC_EX_ME/dout[54]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_300' driven by pin 'branch_PC_EX_ME/dout[55]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_299' driven by pin 'branch_PC_EX_ME/dout[56]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_298' driven by pin 'branch_PC_EX_ME/dout[57]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_297' driven by pin 'branch_PC_EX_ME/dout[58]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_296' driven by pin 'branch_PC_EX_ME/dout[59]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_295' driven by pin 'branch_PC_EX_ME/dout[60]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_294' driven by pin 'branch_PC_EX_ME/dout[61]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_293' driven by pin 'branch_PC_EX_ME/dout[62]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_292' driven by pin 'branch_PC_EX_ME/dout[63]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_291' driven by pin 'control_M_ID_EX/dout[2]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_290' driven by pin 'instruction_ME_WB/dout[0]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_289' driven by pin 'instruction_ME_WB/dout[1]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_288' driven by pin 'instruction_ME_WB/dout[2]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_287' driven by pin 'instruction_ME_WB/dout[3]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_286' driven by pin 'instruction_ME_WB/dout[4]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_285' driven by pin 'instruction_ME_WB/dout[5]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_284' driven by pin 'instruction_ME_WB/dout[6]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_283' driven by pin 'instruction_ME_WB/dout[12]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_282' driven by pin 'instruction_ME_WB/dout[13]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_281' driven by pin 'instruction_ME_WB/dout[14]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_280' driven by pin 'instruction_ME_WB/dout[15]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_279' driven by pin 'instruction_ME_WB/dout[16]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_278' driven by pin 'instruction_ME_WB/dout[17]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_277' driven by pin 'instruction_ME_WB/dout[18]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_276' driven by pin 'instruction_ME_WB/dout[19]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_275' driven by pin 'instruction_ME_WB/dout[20]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_274' driven by pin 'instruction_ME_WB/dout[21]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_273' driven by pin 'instruction_ME_WB/dout[22]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_272' driven by pin 'instruction_ME_WB/dout[23]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_271' driven by pin 'instruction_ME_WB/dout[24]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_270' driven by pin 'instruction_ME_WB/dout[25]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_269' driven by pin 'instruction_ME_WB/dout[26]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_268' driven by pin 'instruction_ME_WB/dout[27]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_267' driven by pin 'instruction_ME_WB/dout[28]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_266' driven by pin 'instruction_ME_WB/dout[29]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_265' driven by pin 'instruction_ME_WB/dout[30]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_264' driven by pin 'instruction_ME_WB/dout[31]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_263' driven by pin 'instruction_EX_ME/dout[0]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_262' driven by pin 'instruction_EX_ME/dout[1]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_261' driven by pin 'instruction_EX_ME/dout[2]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_260' driven by pin 'instruction_EX_ME/dout[3]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_259' driven by pin 'instruction_EX_ME/dout[4]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_258' driven by pin 'instruction_EX_ME/dout[5]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_257' driven by pin 'instruction_EX_ME/dout[6]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_256' driven by pin 'instruction_EX_ME/dout[12]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_255' driven by pin 'instruction_EX_ME/dout[13]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_254' driven by pin 'instruction_EX_ME/dout[14]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_253' driven by pin 'instruction_EX_ME/dout[15]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_252' driven by pin 'instruction_EX_ME/dout[16]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_251' driven by pin 'instruction_EX_ME/dout[17]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_250' driven by pin 'instruction_EX_ME/dout[18]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_249' driven by pin 'instruction_EX_ME/dout[19]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_248' driven by pin 'instruction_EX_ME/dout[20]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_247' driven by pin 'instruction_EX_ME/dout[21]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_246' driven by pin 'instruction_EX_ME/dout[22]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_245' driven by pin 'instruction_EX_ME/dout[23]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_244' driven by pin 'instruction_EX_ME/dout[24]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_243' driven by pin 'instruction_EX_ME/dout[25]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_242' driven by pin 'instruction_EX_ME/dout[26]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_241' driven by pin 'instruction_EX_ME/dout[27]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_240' driven by pin 'instruction_EX_ME/dout[28]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_239' driven by pin 'instruction_EX_ME/dout[29]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_238' driven by pin 'instruction_EX_ME/dout[30]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_237' driven by pin 'instruction_EX_ME/dout[31]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_236' driven by pin 'instruction_ID_EX/dout[0]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_235' driven by pin 'instruction_ID_EX/dout[1]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_234' driven by pin 'instruction_ID_EX/dout[2]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_233' driven by pin 'instruction_ID_EX/dout[3]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_232' driven by pin 'instruction_ID_EX/dout[4]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_231' driven by pin 'instruction_ID_EX/dout[5]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_230' driven by pin 'instruction_ID_EX/dout[6]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_229' driven by pin 'instruction_ID_EX/dout[15]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_228' driven by pin 'instruction_ID_EX/dout[16]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_227' driven by pin 'instruction_ID_EX/dout[17]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_226' driven by pin 'instruction_ID_EX/dout[18]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_225' driven by pin 'instruction_ID_EX/dout[19]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_224' driven by pin 'instruction_ID_EX/dout[20]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_223' driven by pin 'instruction_ID_EX/dout[21]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_222' driven by pin 'instruction_ID_EX/dout[22]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_221' driven by pin 'instruction_ID_EX/dout[23]' has no loads. (LINT-2)
-Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_220' driven by pin 'instruction_ID_EX/dout[24]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_494' driven by pin 'hazard_control_mux/mux_out[7]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_493' driven by pin 'branch_unit/jump_pc[11]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_492' driven by pin 'branch_unit/jump_pc[12]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_491' driven by pin 'branch_unit/jump_pc[13]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_490' driven by pin 'branch_unit/jump_pc[14]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_489' driven by pin 'branch_unit/jump_pc[15]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_488' driven by pin 'branch_unit/jump_pc[16]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_487' driven by pin 'branch_unit/jump_pc[17]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_486' driven by pin 'branch_unit/jump_pc[18]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_485' driven by pin 'branch_unit/jump_pc[19]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_484' driven by pin 'branch_unit/jump_pc[20]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_483' driven by pin 'branch_unit/jump_pc[21]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_482' driven by pin 'branch_unit/jump_pc[22]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_481' driven by pin 'branch_unit/jump_pc[23]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_480' driven by pin 'branch_unit/jump_pc[24]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_479' driven by pin 'branch_unit/jump_pc[25]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_478' driven by pin 'branch_unit/jump_pc[26]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_477' driven by pin 'branch_unit/jump_pc[27]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_476' driven by pin 'branch_unit/jump_pc[28]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_475' driven by pin 'branch_unit/jump_pc[29]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_474' driven by pin 'branch_unit/jump_pc[30]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_473' driven by pin 'branch_unit/jump_pc[31]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_472' driven by pin 'branch_unit/jump_pc[32]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_471' driven by pin 'branch_unit/jump_pc[33]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_470' driven by pin 'branch_unit/jump_pc[34]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_469' driven by pin 'branch_unit/jump_pc[35]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_468' driven by pin 'branch_unit/jump_pc[36]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_467' driven by pin 'branch_unit/jump_pc[37]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_466' driven by pin 'branch_unit/jump_pc[38]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_465' driven by pin 'branch_unit/jump_pc[39]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_464' driven by pin 'branch_unit/jump_pc[40]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_463' driven by pin 'branch_unit/jump_pc[41]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_462' driven by pin 'branch_unit/jump_pc[42]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_461' driven by pin 'branch_unit/jump_pc[43]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_460' driven by pin 'branch_unit/jump_pc[44]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_459' driven by pin 'branch_unit/jump_pc[45]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_458' driven by pin 'branch_unit/jump_pc[46]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_457' driven by pin 'branch_unit/jump_pc[47]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_456' driven by pin 'branch_unit/jump_pc[48]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_455' driven by pin 'branch_unit/jump_pc[49]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_454' driven by pin 'branch_unit/jump_pc[50]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_453' driven by pin 'branch_unit/jump_pc[51]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_452' driven by pin 'branch_unit/jump_pc[52]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_451' driven by pin 'branch_unit/jump_pc[53]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_450' driven by pin 'branch_unit/jump_pc[54]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_449' driven by pin 'branch_unit/jump_pc[55]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_448' driven by pin 'branch_unit/jump_pc[56]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_447' driven by pin 'branch_unit/jump_pc[57]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_446' driven by pin 'branch_unit/jump_pc[58]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_445' driven by pin 'branch_unit/jump_pc[59]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_444' driven by pin 'branch_unit/jump_pc[60]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_443' driven by pin 'branch_unit/jump_pc[61]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_442' driven by pin 'branch_unit/jump_pc[62]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_441' driven by pin 'branch_unit/jump_pc[63]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_440' driven by pin 'branch_unit/branch_pc[11]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_439' driven by pin 'branch_unit/branch_pc[12]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_438' driven by pin 'branch_unit/branch_pc[13]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_437' driven by pin 'branch_unit/branch_pc[14]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_436' driven by pin 'branch_unit/branch_pc[15]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_435' driven by pin 'branch_unit/branch_pc[16]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_434' driven by pin 'branch_unit/branch_pc[17]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_433' driven by pin 'branch_unit/branch_pc[18]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_432' driven by pin 'branch_unit/branch_pc[19]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_431' driven by pin 'branch_unit/branch_pc[20]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_430' driven by pin 'branch_unit/branch_pc[21]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_429' driven by pin 'branch_unit/branch_pc[22]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_428' driven by pin 'branch_unit/branch_pc[23]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_427' driven by pin 'branch_unit/branch_pc[24]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_426' driven by pin 'branch_unit/branch_pc[25]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_425' driven by pin 'branch_unit/branch_pc[26]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_424' driven by pin 'branch_unit/branch_pc[27]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_423' driven by pin 'branch_unit/branch_pc[28]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_422' driven by pin 'branch_unit/branch_pc[29]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_421' driven by pin 'branch_unit/branch_pc[30]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_420' driven by pin 'branch_unit/branch_pc[31]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_419' driven by pin 'branch_unit/branch_pc[32]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_418' driven by pin 'branch_unit/branch_pc[33]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_417' driven by pin 'branch_unit/branch_pc[34]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_416' driven by pin 'branch_unit/branch_pc[35]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_415' driven by pin 'branch_unit/branch_pc[36]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_414' driven by pin 'branch_unit/branch_pc[37]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_413' driven by pin 'branch_unit/branch_pc[38]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_412' driven by pin 'branch_unit/branch_pc[39]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_411' driven by pin 'branch_unit/branch_pc[40]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_410' driven by pin 'branch_unit/branch_pc[41]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_409' driven by pin 'branch_unit/branch_pc[42]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_408' driven by pin 'branch_unit/branch_pc[43]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_407' driven by pin 'branch_unit/branch_pc[44]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_406' driven by pin 'branch_unit/branch_pc[45]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_405' driven by pin 'branch_unit/branch_pc[46]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_404' driven by pin 'branch_unit/branch_pc[47]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_403' driven by pin 'branch_unit/branch_pc[48]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_402' driven by pin 'branch_unit/branch_pc[49]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_401' driven by pin 'branch_unit/branch_pc[50]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_400' driven by pin 'branch_unit/branch_pc[51]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_399' driven by pin 'branch_unit/branch_pc[52]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_398' driven by pin 'branch_unit/branch_pc[53]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_397' driven by pin 'branch_unit/branch_pc[54]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_396' driven by pin 'branch_unit/branch_pc[55]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_395' driven by pin 'branch_unit/branch_pc[56]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_394' driven by pin 'branch_unit/branch_pc[57]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_393' driven by pin 'branch_unit/branch_pc[58]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_392' driven by pin 'branch_unit/branch_pc[59]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_391' driven by pin 'branch_unit/branch_pc[60]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_390' driven by pin 'branch_unit/branch_pc[61]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_389' driven by pin 'branch_unit/branch_pc[62]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_388' driven by pin 'branch_unit/branch_pc[63]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_387' driven by pin 'jump_PC_EX_ME/dout[11]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_386' driven by pin 'jump_PC_EX_ME/dout[12]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_385' driven by pin 'jump_PC_EX_ME/dout[13]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_384' driven by pin 'jump_PC_EX_ME/dout[14]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_383' driven by pin 'jump_PC_EX_ME/dout[15]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_382' driven by pin 'jump_PC_EX_ME/dout[16]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_381' driven by pin 'jump_PC_EX_ME/dout[17]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_380' driven by pin 'jump_PC_EX_ME/dout[18]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_379' driven by pin 'jump_PC_EX_ME/dout[19]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_378' driven by pin 'jump_PC_EX_ME/dout[20]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_377' driven by pin 'jump_PC_EX_ME/dout[21]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_376' driven by pin 'jump_PC_EX_ME/dout[22]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_375' driven by pin 'jump_PC_EX_ME/dout[23]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_374' driven by pin 'jump_PC_EX_ME/dout[24]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_373' driven by pin 'jump_PC_EX_ME/dout[25]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_372' driven by pin 'jump_PC_EX_ME/dout[26]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_371' driven by pin 'jump_PC_EX_ME/dout[27]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_370' driven by pin 'jump_PC_EX_ME/dout[28]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_369' driven by pin 'jump_PC_EX_ME/dout[29]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_368' driven by pin 'jump_PC_EX_ME/dout[30]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_367' driven by pin 'jump_PC_EX_ME/dout[31]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_366' driven by pin 'jump_PC_EX_ME/dout[32]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_365' driven by pin 'jump_PC_EX_ME/dout[33]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_364' driven by pin 'jump_PC_EX_ME/dout[34]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_363' driven by pin 'jump_PC_EX_ME/dout[35]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_362' driven by pin 'jump_PC_EX_ME/dout[36]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_361' driven by pin 'jump_PC_EX_ME/dout[37]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_360' driven by pin 'jump_PC_EX_ME/dout[38]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_359' driven by pin 'jump_PC_EX_ME/dout[39]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_358' driven by pin 'jump_PC_EX_ME/dout[40]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_357' driven by pin 'jump_PC_EX_ME/dout[41]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_356' driven by pin 'jump_PC_EX_ME/dout[42]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_355' driven by pin 'jump_PC_EX_ME/dout[43]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_354' driven by pin 'jump_PC_EX_ME/dout[44]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_353' driven by pin 'jump_PC_EX_ME/dout[45]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_352' driven by pin 'jump_PC_EX_ME/dout[46]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_351' driven by pin 'jump_PC_EX_ME/dout[47]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_350' driven by pin 'jump_PC_EX_ME/dout[48]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_349' driven by pin 'jump_PC_EX_ME/dout[49]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_348' driven by pin 'jump_PC_EX_ME/dout[50]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_347' driven by pin 'jump_PC_EX_ME/dout[51]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_346' driven by pin 'jump_PC_EX_ME/dout[52]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_345' driven by pin 'jump_PC_EX_ME/dout[53]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_344' driven by pin 'jump_PC_EX_ME/dout[54]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_343' driven by pin 'jump_PC_EX_ME/dout[55]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_342' driven by pin 'jump_PC_EX_ME/dout[56]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_341' driven by pin 'jump_PC_EX_ME/dout[57]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_340' driven by pin 'jump_PC_EX_ME/dout[58]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_339' driven by pin 'jump_PC_EX_ME/dout[59]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_338' driven by pin 'jump_PC_EX_ME/dout[60]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_337' driven by pin 'jump_PC_EX_ME/dout[61]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_336' driven by pin 'jump_PC_EX_ME/dout[62]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_335' driven by pin 'jump_PC_EX_ME/dout[63]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_334' driven by pin 'branch_PC_EX_ME/dout[11]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_333' driven by pin 'branch_PC_EX_ME/dout[12]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_332' driven by pin 'branch_PC_EX_ME/dout[13]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_331' driven by pin 'branch_PC_EX_ME/dout[14]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_330' driven by pin 'branch_PC_EX_ME/dout[15]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_329' driven by pin 'branch_PC_EX_ME/dout[16]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_328' driven by pin 'branch_PC_EX_ME/dout[17]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_327' driven by pin 'branch_PC_EX_ME/dout[18]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_326' driven by pin 'branch_PC_EX_ME/dout[19]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_325' driven by pin 'branch_PC_EX_ME/dout[20]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_324' driven by pin 'branch_PC_EX_ME/dout[21]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_323' driven by pin 'branch_PC_EX_ME/dout[22]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_322' driven by pin 'branch_PC_EX_ME/dout[23]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_321' driven by pin 'branch_PC_EX_ME/dout[24]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_320' driven by pin 'branch_PC_EX_ME/dout[25]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_319' driven by pin 'branch_PC_EX_ME/dout[26]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_318' driven by pin 'branch_PC_EX_ME/dout[27]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_317' driven by pin 'branch_PC_EX_ME/dout[28]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_316' driven by pin 'branch_PC_EX_ME/dout[29]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_315' driven by pin 'branch_PC_EX_ME/dout[30]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_314' driven by pin 'branch_PC_EX_ME/dout[31]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_313' driven by pin 'branch_PC_EX_ME/dout[32]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_312' driven by pin 'branch_PC_EX_ME/dout[33]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_311' driven by pin 'branch_PC_EX_ME/dout[34]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_310' driven by pin 'branch_PC_EX_ME/dout[35]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_309' driven by pin 'branch_PC_EX_ME/dout[36]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_308' driven by pin 'branch_PC_EX_ME/dout[37]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_307' driven by pin 'branch_PC_EX_ME/dout[38]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_306' driven by pin 'branch_PC_EX_ME/dout[39]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_305' driven by pin 'branch_PC_EX_ME/dout[40]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_304' driven by pin 'branch_PC_EX_ME/dout[41]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_303' driven by pin 'branch_PC_EX_ME/dout[42]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_302' driven by pin 'branch_PC_EX_ME/dout[43]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_301' driven by pin 'branch_PC_EX_ME/dout[44]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_300' driven by pin 'branch_PC_EX_ME/dout[45]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_299' driven by pin 'branch_PC_EX_ME/dout[46]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_298' driven by pin 'branch_PC_EX_ME/dout[47]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_297' driven by pin 'branch_PC_EX_ME/dout[48]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_296' driven by pin 'branch_PC_EX_ME/dout[49]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_295' driven by pin 'branch_PC_EX_ME/dout[50]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_294' driven by pin 'branch_PC_EX_ME/dout[51]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_293' driven by pin 'branch_PC_EX_ME/dout[52]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_292' driven by pin 'branch_PC_EX_ME/dout[53]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_291' driven by pin 'branch_PC_EX_ME/dout[54]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_290' driven by pin 'branch_PC_EX_ME/dout[55]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_289' driven by pin 'branch_PC_EX_ME/dout[56]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_288' driven by pin 'branch_PC_EX_ME/dout[57]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_287' driven by pin 'branch_PC_EX_ME/dout[58]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_286' driven by pin 'branch_PC_EX_ME/dout[59]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_285' driven by pin 'branch_PC_EX_ME/dout[60]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_284' driven by pin 'branch_PC_EX_ME/dout[61]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_283' driven by pin 'branch_PC_EX_ME/dout[62]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_282' driven by pin 'branch_PC_EX_ME/dout[63]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_281' driven by pin 'control_unit/alu_op[0]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_280' driven by pin 'instruction_ME_WB/dout[0]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_279' driven by pin 'instruction_ME_WB/dout[1]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_278' driven by pin 'instruction_ME_WB/dout[2]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_277' driven by pin 'instruction_ME_WB/dout[3]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_276' driven by pin 'instruction_ME_WB/dout[4]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_275' driven by pin 'instruction_ME_WB/dout[5]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_274' driven by pin 'instruction_ME_WB/dout[6]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_273' driven by pin 'instruction_ME_WB/dout[12]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_272' driven by pin 'instruction_ME_WB/dout[13]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_271' driven by pin 'instruction_ME_WB/dout[14]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_270' driven by pin 'instruction_ME_WB/dout[15]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_269' driven by pin 'instruction_ME_WB/dout[16]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_268' driven by pin 'instruction_ME_WB/dout[17]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_267' driven by pin 'instruction_ME_WB/dout[18]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_266' driven by pin 'instruction_ME_WB/dout[19]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_265' driven by pin 'instruction_ME_WB/dout[20]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_264' driven by pin 'instruction_ME_WB/dout[21]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_263' driven by pin 'instruction_ME_WB/dout[22]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_262' driven by pin 'instruction_ME_WB/dout[23]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_261' driven by pin 'instruction_ME_WB/dout[24]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_260' driven by pin 'instruction_ME_WB/dout[25]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_259' driven by pin 'instruction_ME_WB/dout[26]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_258' driven by pin 'instruction_ME_WB/dout[27]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_257' driven by pin 'instruction_ME_WB/dout[28]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_256' driven by pin 'instruction_ME_WB/dout[29]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_255' driven by pin 'instruction_ME_WB/dout[30]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_254' driven by pin 'instruction_ME_WB/dout[31]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_253' driven by pin 'instruction_EX_ME/dout[0]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_252' driven by pin 'instruction_EX_ME/dout[1]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_251' driven by pin 'instruction_EX_ME/dout[2]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_250' driven by pin 'instruction_EX_ME/dout[3]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_249' driven by pin 'instruction_EX_ME/dout[4]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_248' driven by pin 'instruction_EX_ME/dout[5]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_247' driven by pin 'instruction_EX_ME/dout[6]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_246' driven by pin 'instruction_EX_ME/dout[12]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_245' driven by pin 'instruction_EX_ME/dout[13]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_244' driven by pin 'instruction_EX_ME/dout[14]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_243' driven by pin 'instruction_EX_ME/dout[15]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_242' driven by pin 'instruction_EX_ME/dout[16]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_241' driven by pin 'instruction_EX_ME/dout[17]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_240' driven by pin 'instruction_EX_ME/dout[18]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_239' driven by pin 'instruction_EX_ME/dout[19]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_238' driven by pin 'instruction_EX_ME/dout[20]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_237' driven by pin 'instruction_EX_ME/dout[21]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_236' driven by pin 'instruction_EX_ME/dout[22]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_235' driven by pin 'instruction_EX_ME/dout[23]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_234' driven by pin 'instruction_EX_ME/dout[24]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_233' driven by pin 'instruction_EX_ME/dout[25]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_232' driven by pin 'instruction_EX_ME/dout[26]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_231' driven by pin 'instruction_EX_ME/dout[27]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_230' driven by pin 'instruction_EX_ME/dout[28]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_229' driven by pin 'instruction_EX_ME/dout[29]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_228' driven by pin 'instruction_EX_ME/dout[30]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_227' driven by pin 'instruction_EX_ME/dout[31]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_226' driven by pin 'instruction_ID_EX/dout[0]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_225' driven by pin 'instruction_ID_EX/dout[1]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_224' driven by pin 'instruction_ID_EX/dout[2]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_223' driven by pin 'instruction_ID_EX/dout[3]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_222' driven by pin 'instruction_ID_EX/dout[4]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_221' driven by pin 'instruction_ID_EX/dout[5]' has no loads. (LINT-2)
+Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_220' driven by pin 'instruction_ID_EX/dout[6]' has no loads. (LINT-2)
 Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_219' driven by pin 'instruction_ID_EX/dout[26]' has no loads. (LINT-2)
 Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_218' driven by pin 'instruction_ID_EX/dout[27]' has no loads. (LINT-2)
 Warning: In design 'cpu', net 'SYNOPSYS_UNCONNECTED_217' driven by pin 'instruction_ID_EX/dout[28]' has no loads. (LINT-2)
@@ -5189,6 +5128,7 @@ Warning: In design 'sram_BW64_ADDR_W10_DATA_W64', port 'addr_ext[1]' is not conn
 Warning: In design 'sram_BW64_ADDR_W10_DATA_W64', port 'addr_ext[0]' is not connected to any nets. (LINT-28)
 Warning: In design 'sram_BW64_ADDR_W10_DATA_W64', port 'ren' is not connected to any nets. (LINT-28)
 Warning: In design 'sram_BW64_ADDR_W10_DATA_W64', port 'ren_ext' is not connected to any nets. (LINT-28)
+Warning: In design 'control_unit', port 'alu_op[0]' is not connected to any nets. (LINT-28)
 Warning: In design 'control_unit', port 'reg_dst' is not connected to any nets. (LINT-28)
 Warning: In design 'control_unit', port 'mem_read' is not connected to any nets. (LINT-28)
 Warning: In design 'alu_DATA_W64', port 'overflow' is not connected to any nets. (LINT-28)
@@ -5404,6 +5344,21 @@ Warning: In design 'branch_unit_DATA_W64', port 'jump_pc[14]' is not connected t
 Warning: In design 'branch_unit_DATA_W64', port 'jump_pc[13]' is not connected to any nets. (LINT-28)
 Warning: In design 'branch_unit_DATA_W64', port 'jump_pc[12]' is not connected to any nets. (LINT-28)
 Warning: In design 'branch_unit_DATA_W64', port 'jump_pc[11]' is not connected to any nets. (LINT-28)
+Warning: In design 'hazard_detection', port 'IF_ID_Write' is not connected to any nets. (LINT-28)
+Warning: In design 'mux_2_DATA_W10', port 'input_a[8]' is not connected to any nets. (LINT-28)
+Warning: In design 'mux_2_DATA_W10', port 'input_a[7]' is not connected to any nets. (LINT-28)
+Warning: In design 'mux_2_DATA_W10', port 'input_a[5]' is not connected to any nets. (LINT-28)
+Warning: In design 'mux_2_DATA_W10', port 'input_b[9]' is not connected to any nets. (LINT-28)
+Warning: In design 'mux_2_DATA_W10', port 'input_b[8]' is not connected to any nets. (LINT-28)
+Warning: In design 'mux_2_DATA_W10', port 'input_b[7]' is not connected to any nets. (LINT-28)
+Warning: In design 'mux_2_DATA_W10', port 'input_b[6]' is not connected to any nets. (LINT-28)
+Warning: In design 'mux_2_DATA_W10', port 'input_b[5]' is not connected to any nets. (LINT-28)
+Warning: In design 'mux_2_DATA_W10', port 'input_b[4]' is not connected to any nets. (LINT-28)
+Warning: In design 'mux_2_DATA_W10', port 'input_b[3]' is not connected to any nets. (LINT-28)
+Warning: In design 'mux_2_DATA_W10', port 'input_b[2]' is not connected to any nets. (LINT-28)
+Warning: In design 'mux_2_DATA_W10', port 'input_b[1]' is not connected to any nets. (LINT-28)
+Warning: In design 'mux_2_DATA_W10', port 'input_b[0]' is not connected to any nets. (LINT-28)
+Warning: In design 'mux_2_DATA_W10', port 'mux_out[7]' is not connected to any nets. (LINT-28)
 Warning: In design 'mux_2_DATA_W64_0', port 'input_a[63]' is not connected to any nets. (LINT-28)
 Warning: In design 'mux_2_DATA_W64_0', port 'input_a[62]' is not connected to any nets. (LINT-28)
 Warning: In design 'mux_2_DATA_W64_0', port 'input_a[61]' is not connected to any nets. (LINT-28)
@@ -5939,16 +5894,6 @@ Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[29]' is not connected to
 Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[28]' is not connected to any nets. (LINT-28)
 Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[27]' is not connected to any nets. (LINT-28)
 Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[26]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[24]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[23]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[22]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[21]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[20]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[19]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[18]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[17]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[16]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[15]' is not connected to any nets. (LINT-28)
 Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[6]' is not connected to any nets. (LINT-28)
 Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[5]' is not connected to any nets. (LINT-28)
 Warning: In design 'reg_arstn_en_DATA_W32_2', port 'din[4]' is not connected to any nets. (LINT-28)
@@ -5961,16 +5906,6 @@ Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[29]' is not connected t
 Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[28]' is not connected to any nets. (LINT-28)
 Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[27]' is not connected to any nets. (LINT-28)
 Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[26]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[24]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[23]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[22]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[21]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[20]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[19]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[18]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[17]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[16]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[15]' is not connected to any nets. (LINT-28)
 Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[6]' is not connected to any nets. (LINT-28)
 Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[5]' is not connected to any nets. (LINT-28)
 Warning: In design 'reg_arstn_en_DATA_W32_2', port 'dout[4]' is not connected to any nets. (LINT-28)
@@ -6086,8 +6021,6 @@ Warning: In design 'reg_arstn_en_DATA_W32_0', port 'dout[3]' is not connected to
 Warning: In design 'reg_arstn_en_DATA_W32_0', port 'dout[2]' is not connected to any nets. (LINT-28)
 Warning: In design 'reg_arstn_en_DATA_W32_0', port 'dout[1]' is not connected to any nets. (LINT-28)
 Warning: In design 'reg_arstn_en_DATA_W32_0', port 'dout[0]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W4_1', port 'din[2]' is not connected to any nets. (LINT-28)
-Warning: In design 'reg_arstn_en_DATA_W4_1', port 'dout[2]' is not connected to any nets. (LINT-28)
 Warning: In design 'reg_arstn_en_DATA_W4_0', port 'din[2]' is not connected to any nets. (LINT-28)
 Warning: In design 'reg_arstn_en_DATA_W4_0', port 'dout_2_' is not connected to any nets. (LINT-28)
 Warning: In design 'reg_arstn_en_DATA_W64_4', port 'din[63]' is not connected to any nets. (LINT-28)
@@ -6501,7 +6434,6 @@ Warning: In design 'immediate_extend_unit', output port 'immediate_extended[63]'
 Warning: In design 'immediate_extend_unit', output port 'immediate_extended[63]' is connected directly to output port 'immediate_extended[32]'. (LINT-31)
 Warning: In design 'immediate_extend_unit', output port 'immediate_extended[63]' is connected directly to output port 'immediate_extended[33]'. (LINT-31)
 Warning: In design 'immediate_extend_unit', output port 'immediate_extended[63]' is connected directly to output port 'immediate_extended[34]'. (LINT-31)
-Warning: In design 'control_unit', output port 'alu_op[0]' is connected directly to output port 'branch'. (LINT-31)
 Warning: In design 'branch_unit_DATA_W64', output port 'branch_pc[10]' is connected directly to output port 'jump_pc[10]'. (LINT-31)
 Warning: In design 'branch_unit_DATA_W64', output port 'branch_pc[9]' is connected directly to output port 'jump_pc[9]'. (LINT-31)
 Warning: In design 'branch_unit_DATA_W64', output port 'branch_pc[8]' is connected directly to output port 'jump_pc[8]'. (LINT-31)
@@ -6513,6 +6445,9 @@ Warning: In design 'branch_unit_DATA_W64', output port 'branch_pc[3]' is connect
 Warning: In design 'branch_unit_DATA_W64', output port 'branch_pc[2]' is connected directly to output port 'jump_pc[2]'. (LINT-31)
 Warning: In design 'branch_unit_DATA_W64', output port 'branch_pc[1]' is connected directly to output port 'jump_pc[1]'. (LINT-31)
 Warning: In design 'branch_unit_DATA_W64', output port 'branch_pc[0]' is connected directly to output port 'jump_pc[0]'. (LINT-31)
+Warning: In design 'hazard_detection', output port 'hazardMux' is connected directly to output port 'PCWrite'. (LINT-31)
+Warning: In design 'mux_2_DATA_W10', output port 'mux_out[8]' is connected directly to output port 'mux_out[6]'. (LINT-31)
+Warning: In design 'mux_2_DATA_W10', output port 'mux_out[5]' is connected directly to output port 'mux_out[4]'. (LINT-31)
 Warning: In design 'cpu', a pin on submodule 'immediate_extend_u' is connected to logic 1 or logic 0. (LINT-32)
    Pin 'instruction[2]' is connected to logic 0. 
 Warning: In design 'cpu', a pin on submodule 'immediate_extend_u' is connected to logic 1 or logic 0. (LINT-32)
@@ -7244,26 +7179,6 @@ Warning: In design 'cpu', a pin on submodule 'instruction_ID_EX' is connected to
 Warning: In design 'cpu', a pin on submodule 'instruction_ID_EX' is connected to logic 1 or logic 0. (LINT-32)
    Pin 'din[26]' is connected to logic 0. 
 Warning: In design 'cpu', a pin on submodule 'instruction_ID_EX' is connected to logic 1 or logic 0. (LINT-32)
-   Pin 'din[24]' is connected to logic 0. 
-Warning: In design 'cpu', a pin on submodule 'instruction_ID_EX' is connected to logic 1 or logic 0. (LINT-32)
-   Pin 'din[23]' is connected to logic 0. 
-Warning: In design 'cpu', a pin on submodule 'instruction_ID_EX' is connected to logic 1 or logic 0. (LINT-32)
-   Pin 'din[22]' is connected to logic 0. 
-Warning: In design 'cpu', a pin on submodule 'instruction_ID_EX' is connected to logic 1 or logic 0. (LINT-32)
-   Pin 'din[21]' is connected to logic 0. 
-Warning: In design 'cpu', a pin on submodule 'instruction_ID_EX' is connected to logic 1 or logic 0. (LINT-32)
-   Pin 'din[20]' is connected to logic 0. 
-Warning: In design 'cpu', a pin on submodule 'instruction_ID_EX' is connected to logic 1 or logic 0. (LINT-32)
-   Pin 'din[19]' is connected to logic 0. 
-Warning: In design 'cpu', a pin on submodule 'instruction_ID_EX' is connected to logic 1 or logic 0. (LINT-32)
-   Pin 'din[18]' is connected to logic 0. 
-Warning: In design 'cpu', a pin on submodule 'instruction_ID_EX' is connected to logic 1 or logic 0. (LINT-32)
-   Pin 'din[17]' is connected to logic 0. 
-Warning: In design 'cpu', a pin on submodule 'instruction_ID_EX' is connected to logic 1 or logic 0. (LINT-32)
-   Pin 'din[16]' is connected to logic 0. 
-Warning: In design 'cpu', a pin on submodule 'instruction_ID_EX' is connected to logic 1 or logic 0. (LINT-32)
-   Pin 'din[15]' is connected to logic 0. 
-Warning: In design 'cpu', a pin on submodule 'instruction_ID_EX' is connected to logic 1 or logic 0. (LINT-32)
    Pin 'din[6]' is connected to logic 0. 
 Warning: In design 'cpu', a pin on submodule 'instruction_ID_EX' is connected to logic 1 or logic 0. (LINT-32)
    Pin 'din[5]' is connected to logic 0. 
@@ -7605,8 +7520,6 @@ Warning: In design 'cpu', a pin on submodule 'data_memory' is connected to logic
    Pin 'ren' is connected to logic 0. 
 Warning: In design 'cpu', a pin on submodule 'data_memory' is connected to logic 1 or logic 0. (LINT-32)
    Pin 'ren_ext' is connected to logic 0. 
-Warning: In design 'cpu', a pin on submodule 'control_M_ID_EX' is connected to logic 1 or logic 0. (LINT-32)
-   Pin 'din[2]' is connected to logic 0. 
 Warning: In design 'cpu', a pin on submodule 'control_M_EX_ME' is connected to logic 1 or logic 0. (LINT-32)
    Pin 'din[2]' is connected to logic 0. 
 Warning: In design 'cpu', a pin on submodule 'branch_PC_EX_ME' is connected to logic 1 or logic 0. (LINT-32)
@@ -8033,6 +7946,32 @@ Warning: In design 'cpu', a pin on submodule 'branch_unit' is connected to logic
    Pin 'immediate_extended[12]' is connected to logic 0. 
 Warning: In design 'cpu', a pin on submodule 'branch_unit' is connected to logic 1 or logic 0. (LINT-32)
    Pin 'immediate_extended[11]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_a[8]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_a[7]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_a[5]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[9]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[8]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[7]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[6]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[5]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[4]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[3]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[2]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[1]' is connected to logic 0. 
+Warning: In design 'cpu', a pin on submodule 'hazard_control_mux' is connected to logic 1 or logic 0. (LINT-32)
+   Pin 'input_b[0]' is connected to logic 0. 
 Warning: In design 'pc_DATA_W64', a pin on submodule 'mux_branch' is connected to logic 1 or logic 0. (LINT-32)
    Pin 'input_a[63]' is connected to logic 0. 
 Warning: In design 'pc_DATA_W64', a pin on submodule 'mux_branch' is connected to logic 1 or logic 0. (LINT-32)
@@ -8663,8 +8602,20 @@ Warning: In design 'reg_arstn_en_DATA_W64_0', a pin on submodule 'clk_gate_r_reg
    Pin 'TE' is connected to logic 0. 
 Warning: In design 'reg_arstn_en_64_s00000000', a pin on submodule 'clk_gate_r_reg' is connected to logic 1 or logic 0. (LINT-32)
    Pin 'TE' is connected to logic 0. 
+Warning: In design 'cpu', the same net is connected to more than one pin on submodule 'immediate_extend_u'. (LINT-33)
+   Net 'reg_dst' is connected to pins 'instruction[2]', 'instruction[1]'', 'instruction[0]'.
 Warning: In design 'cpu', the same net is connected to more than one pin on submodule 'instruction_memory'. (LINT-33)
-   Net 'n_Logic0_' is connected to pins 'wen', 'wdata[31]'', 'wdata[30]', 'wdata[29]', 'wdata[28]', 'wdata[27]', 'wdata[26]', 'wdata[25]', 'wdata[24]', 'wdata[23]', 'wdata[22]', 'wdata[21]', 'wdata[20]', 'wdata[19]', 'wdata[18]', 'wdata[17]', 'wdata[16]', 'wdata[15]', 'wdata[14]', 'wdata[13]', 'wdata[12]', 'wdata[11]', 'wdata[10]', 'wdata[9]', 'wdata[8]', 'wdata[7]', 'wdata[6]', 'wdata[5]', 'wdata[4]', 'wdata[3]', 'wdata[2]', 'wdata[1]', 'wdata[0]'.
+   Net 'reg_dst' is connected to pins 'addr[63]', 'addr[62]'', 'addr[61]', 'addr[60]', 'addr[59]', 'addr[58]', 'addr[57]', 'addr[56]', 'addr[55]', 'addr[54]', 'addr[53]', 'addr[52]', 'addr[51]', 'addr[50]', 'addr[49]', 'addr[48]', 'addr[47]', 'addr[46]', 'addr[45]', 'addr[44]', 'addr[43]', 'addr[42]', 'addr[41]', 'addr[40]', 'addr[39]', 'addr[38]', 'addr[37]', 'addr[36]', 'addr[35]', 'addr[34]', 'addr[33]', 'addr[32]', 'addr[31]', 'addr[30]', 'addr[29]', 'addr[28]', 'addr[27]', 'addr[26]', 'addr[25]', 'addr[24]', 'addr[23]', 'addr[22]', 'addr[21]', 'addr[20]', 'addr[19]', 'addr[18]', 'addr[17]', 'addr[16]', 'addr[15]', 'addr[14]', 'addr[13]', 'addr[12]', 'addr[11]', 'addr[1]', 'addr[0]', 'addr_ext[63]', 'addr_ext[62]', 'addr_ext[61]', 'addr_ext[60]', 'addr_ext[59]', 'addr_ext[58]', 'addr_ext[57]', 'addr_ext[56]', 'addr_ext[55]', 'addr_ext[54]', 'addr_ext[53]', 'addr_ext[52]', 'addr_ext[51]', 'addr_ext[50]', 'addr_ext[49]', 'addr_ext[48]', 'addr_ext[47]', 'addr_ext[46]', 'addr_ext[45]', 'addr_ext[44]', 'addr_ext[43]', 'addr_ext[42]', 'addr_ext[41]', 'addr_ext[40]', 'addr_ext[39]', 'addr_ext[38]', 'addr_ext[37]', 'addr_ext[36]', 'addr_ext[35]', 'addr_ext[34]', 'addr_ext[33]', 'addr_ext[32]', 'addr_ext[31]', 'addr_ext[30]', 'addr_ext[29]', 'addr_ext[28]', 'addr_ext[27]', 'addr_ext[26]', 'addr_ext[25]', 'addr_ext[24]', 'addr_ext[23]', 'addr_ext[22]', 'addr_ext[21]', 'addr_ext[20]', 'addr_ext[19]', 'addr_ext[18]', 'addr_ext[17]', 'addr_ext[16]', 'addr_ext[15]', 'addr_ext[14]', 'addr_ext[13]', 'addr_ext[12]', 'addr_ext[11]', 'addr_ext[1]', 'addr_ext[0]', 'wen', 'ren_ext', 'wdata[31]', 'wdata[30]', 'wdata[29]', 'wdata[28]', 'wdata[27]', 'wdata[26]', 'wdata[25]', 'wdata[24]', 'wdata[23]', 'wdata[22]', 'wdata[21]', 'wdata[20]', 'wdata[19]', 'wdata[18]', 'wdata[17]', 'wdata[16]', 'wdata[15]', 'wdata[14]', 'wdata[13]', 'wdata[12]', 'wdata[11]', 'wdata[10]', 'wdata[9]', 'wdata[8]', 'wdata[7]', 'wdata[6]', 'wdata[5]', 'wdata[4]', 'wdata[3]', 'wdata[2]', 'wdata[1]', 'wdata[0]'.
+Warning: In design 'cpu', the same net is connected to more than one pin on submodule 'instruction_ID_EX'. (LINT-33)
+   Net 'reg_dst' is connected to pins 'din[31]', 'din[29]'', 'din[28]', 'din[27]', 'din[26]', 'din[6]', 'din[5]', 'din[4]', 'din[3]', 'din[2]', 'din[1]', 'din[0]'.
+Warning: In design 'cpu', the same net is connected to more than one pin on submodule 'instruction_EX_ME'. (LINT-33)
+   Net 'reg_dst' is connected to pins 'din[31]', 'din[30]'', 'din[29]', 'din[28]', 'din[27]', 'din[26]', 'din[25]', 'din[24]', 'din[23]', 'din[22]', 'din[21]', 'din[20]', 'din[19]', 'din[18]', 'din[17]', 'din[16]', 'din[15]', 'din[14]', 'din[13]', 'din[12]', 'din[6]', 'din[5]', 'din[4]', 'din[3]', 'din[2]', 'din[1]', 'din[0]'.
+Warning: In design 'cpu', the same net is connected to more than one pin on submodule 'instruction_ME_WB'. (LINT-33)
+   Net 'reg_dst' is connected to pins 'din[31]', 'din[30]'', 'din[29]', 'din[28]', 'din[27]', 'din[26]', 'din[25]', 'din[24]', 'din[23]', 'din[22]', 'din[21]', 'din[20]', 'din[19]', 'din[18]', 'din[17]', 'din[16]', 'din[15]', 'din[14]', 'din[13]', 'din[12]', 'din[6]', 'din[5]', 'din[4]', 'din[3]', 'din[2]', 'din[1]', 'din[0]'.
+Warning: In design 'cpu', the same net is connected to more than one pin on submodule 'data_memory'. (LINT-33)
+   Net 'reg_dst' is connected to pins 'addr[63]', 'addr[62]'', 'addr[61]', 'addr[60]', 'addr[59]', 'addr[58]', 'addr[57]', 'addr[56]', 'addr[55]', 'addr[54]', 'addr[53]', 'addr[52]', 'addr[51]', 'addr[50]', 'addr[49]', 'addr[48]', 'addr[47]', 'addr[46]', 'addr[45]', 'addr[44]', 'addr[43]', 'addr[42]', 'addr[41]', 'addr[40]', 'addr[39]', 'addr[38]', 'addr[37]', 'addr[36]', 'addr[35]', 'addr[34]', 'addr[33]', 'addr[32]', 'addr[31]', 'addr[30]', 'addr[29]', 'addr[28]', 'addr[27]', 'addr[26]', 'addr[25]', 'addr[24]', 'addr[23]', 'addr[22]', 'addr[21]', 'addr[20]', 'addr[19]', 'addr[18]', 'addr[17]', 'addr[16]', 'addr[15]', 'addr[14]', 'addr[13]', 'addr[2]', 'addr[1]', 'addr[0]', 'addr_ext[63]', 'addr_ext[62]', 'addr_ext[61]', 'addr_ext[60]', 'addr_ext[59]', 'addr_ext[58]', 'addr_ext[57]', 'addr_ext[56]', 'addr_ext[55]', 'addr_ext[54]', 'addr_ext[53]', 'addr_ext[52]', 'addr_ext[51]', 'addr_ext[50]', 'addr_ext[49]', 'addr_ext[48]', 'addr_ext[47]', 'addr_ext[46]', 'addr_ext[45]', 'addr_ext[44]', 'addr_ext[43]', 'addr_ext[42]', 'addr_ext[41]', 'addr_ext[40]', 'addr_ext[39]', 'addr_ext[38]', 'addr_ext[37]', 'addr_ext[36]', 'addr_ext[35]', 'addr_ext[34]', 'addr_ext[33]', 'addr_ext[32]', 'addr_ext[31]', 'addr_ext[30]', 'addr_ext[29]', 'addr_ext[28]', 'addr_ext[27]', 'addr_ext[26]', 'addr_ext[25]', 'addr_ext[24]', 'addr_ext[23]', 'addr_ext[22]', 'addr_ext[21]', 'addr_ext[20]', 'addr_ext[19]', 'addr_ext[18]', 'addr_ext[17]', 'addr_ext[16]', 'addr_ext[15]', 'addr_ext[14]', 'addr_ext[13]', 'addr_ext[2]', 'addr_ext[1]', 'addr_ext[0]', 'ren', 'ren_ext'.
+Warning: In design 'cpu', the same net is connected to more than one pin on submodule 'hazard_control_mux'. (LINT-33)
+   Net 'reg_dst' is connected to pins 'input_a[7]', 'input_b[9]'', 'input_b[8]', 'input_b[7]', 'input_b[6]', 'input_b[5]', 'input_b[4]', 'input_b[3]', 'input_b[2]', 'input_b[1]', 'input_b[0]'.
 1
 ## save ddc file
 #write -hierarchy -f ddc -output "./ddc/${top_des_name}.ddc"

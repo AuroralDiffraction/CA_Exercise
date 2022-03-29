@@ -6,7 +6,6 @@
 +nc64bit
 +nctimescale+1ns/10ps
 +access+rwc
-+gui
 -noshowtop
 -timescale
 1ns/10ps

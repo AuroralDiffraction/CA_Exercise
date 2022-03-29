@@ -1,7 +1,7 @@
 #@ # 
 #@ # Running dc_shell Version N-2017.09-SP3 for linux64 -- Jan 18, 2018
-#@ # Date:   Thu Mar 17 18:40:18 2022
-#@ # Run by: r0870767@pc-klas3-10.esat.kuleuven.be
+#@ # Date:   Tue Mar 29 02:08:29 2022
+#@ # Run by: r0870767@stud-r8-spice-a.esat.kuleuven.be
 #@ 
 
 source /esat/micas-data/software/synopsys_2017.09/admin/setup/.synopsys_dc.setup
@@ -6672,11 +6672,14 @@ source -echo -verbose /users/students/r0870767/Documents/CA_exercise/CA_Exercise
 #@    cpu
 #@    immediate_extend_unit
 #@    mux_2
+#@    mux_3
 #@    pc
 #@    reg_arstn
 #@    reg_arstn_en
 #@    register_file
 #@    sram
+#@    forward_unit
+#@    hazard_detection
 #@ }
 #@ 
 #@ 
